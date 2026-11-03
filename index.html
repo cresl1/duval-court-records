@@ -14,15 +14,17 @@
 <link rel="icon" href="favicon.png">
 <style>
   :root{
-    --bg:#f6f4ef; --card:#ffffff; --ink:#1c2433; --sub:#5d6572;
-    --navy:#0b2545; --navy2:#13315c; --gold:#b3893c; --gold-soft:rgba(179,137,60,.14);
-    --blue:#0a84ff; --sep:rgba(28,36,51,.10); --hair:rgba(179,137,60,.35);
+    --bg:#f6f4ef; --card:#ffffff; --ink:#1c2433; --sub:#4d5464;
+    --navy:#0b2545; --navy2:#13315c; --gold:#8a6520; --gold-soft:rgba(179,137,60,.14);
+    --blue:#0a66c2; --sep:rgba(28,36,51,.12); --hair:rgba(138,101,32,.45);
+    --focus:#8a6520;
   }
   @media (prefers-color-scheme: dark){
     :root{
-      --bg:#0d1117; --card:#161c26; --ink:#eceef2; --sub:#9aa3b0;
-      --navy:#12233d; --navy2:#1a3054; --gold:#c9a45a; --gold-soft:rgba(201,164,90,.12);
-      --sep:rgba(236,238,242,.12); --hair:rgba(201,164,90,.28);
+      --bg:#0d1117; --card:#161c26; --ink:#eceef2; --sub:#a8b1bd;
+      --navy:#12233d; --navy2:#1a3054; --gold:#d3b169; --gold-soft:rgba(201,164,90,.12);
+      --blue:#5aa2ff; --sep:rgba(236,238,242,.14); --hair:rgba(211,177,105,.30);
+      --focus:#d3b169;
     }
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
@@ -31,121 +33,143 @@
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
     background:var(--bg); color:var(--ink); min-height:100dvh;
     padding:calc(env(safe-area-inset-top) + 14px) 18px calc(env(safe-area-inset-bottom) + 28px);
+    -webkit-text-size-adjust:100%;
   }
-  .wrap{max-width:640px; margin:0 auto}
+  .wrap{max-width:680px; margin:0 auto}
 
-  header{padding:8px 2px 0; text-align:center}
+  .skip{
+    position:absolute; left:-9999px; top:0; background:var(--navy); color:#fff;
+    padding:10px 16px; border-radius:0 0 10px 0; z-index:20; font-size:1rem; font-weight:600;
+  }
+  .skip:focus{left:0}
+
+  :is(a,button,input,[tabindex]):focus-visible{
+    outline:2px solid var(--focus); outline-offset:2px; border-radius:4px;
+  }
+
+  header{padding:0.5rem 0.125rem 0; text-align:center}
   .crest{
-    width:52px; height:52px; border-radius:50%;
+    width:3.25rem; height:3.25rem; border-radius:50%;
     background:linear-gradient(180deg,var(--navy2),var(--navy));
-    display:flex; align-items:center; justify-content:center; margin:0 auto 12px;
+    display:flex; align-items:center; justify-content:center; margin:0 auto 0.75rem;
     box-shadow:0 4px 14px rgba(11,37,69,.30), inset 0 0 0 1.5px var(--hair);
   }
   .eyebrow{
-    font-size:11px; letter-spacing:2.2px; text-transform:uppercase;
-    color:var(--gold); font-weight:600; margin:0;
+    font-size:0.6875rem; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--gold); font-weight:700; margin:0;
   }
   h1{
-    font-family:Georgia,"Times New Roman",serif; font-size:27px; font-weight:600;
-    margin:6px 0 0; letter-spacing:.2px; color:var(--ink);
+    font-family:Georgia,"Times New Roman",serif; font-size:1.6875rem; font-weight:600;
+    margin:0.375rem 0 0; letter-spacing:0.01em; color:var(--ink); line-height:1.2;
   }
-  .sub{margin:6px 0 0; color:var(--sub); font-size:13.5px}
-  .rule{height:1px; background:linear-gradient(90deg,transparent,var(--hair) 18%,var(--hair) 82%,transparent); margin:18px 0 0}
+  .sub{margin:0.375rem 0 0; color:var(--sub); font-size:0.875rem}
+  .rule{height:1px; background:linear-gradient(90deg,transparent,var(--hair) 18%,var(--hair) 82%,transparent); margin:1.125rem 0 0}
 
   .chips{
-    display:flex; gap:8px; overflow-x:auto; padding:16px 0 2px; margin:0 -2px;
+    display:flex; gap:0.5rem; overflow-x:auto; padding:1rem 0 0.125rem; margin:0 -0.125rem;
     scrollbar-width:none;
   }
   .chips::-webkit-scrollbar{display:none}
   .chips a{
-    flex:0 0 auto; padding:7px 14px; border-radius:999px; text-decoration:none;
-    font-size:13px; font-weight:600; color:var(--ink);
+    flex:0 0 auto; padding:0.5rem 0.875rem; border-radius:999px; text-decoration:none;
+    font-size:0.8125rem; font-weight:600; color:var(--ink);
     background:var(--card); box-shadow:0 1px 2px rgba(0,0,0,.05), inset 0 0 0 1px var(--sep);
+    min-height:2.5rem; display:inline-flex; align-items:center;
   }
   .chips a:active{transform:scale(.97)}
 
   .btn{
-    display:flex; align-items:center; justify-content:center; gap:10px;
-    width:100%; padding:16px; border-radius:14px; border:0; margin-top:18px;
+    display:flex; align-items:center; justify-content:center; gap:0.625rem;
+    width:100%; padding:1rem; border-radius:0.875rem; border:0; margin-top:1.125rem;
     background:linear-gradient(180deg,var(--navy2),var(--navy)); color:#fff;
-    font-size:17px; font-weight:600; text-decoration:none;
+    font-size:1.0625rem; font-weight:600; text-decoration:none;
     box-shadow:0 6px 16px rgba(11,37,69,.28), inset 0 0 0 1px rgba(255,255,255,.06); cursor:pointer;
+    min-height:3rem;
   }
   .btn:active{transform:scale(.985)}
-  .hint{color:var(--sub); font-size:13px; line-height:1.5; margin:10px 2px 0}
+  .hint{color:var(--sub); font-size:0.8125rem; line-height:1.5; margin:0.625rem 0.125rem 0}
 
-  section{margin-top:30px}
-  .shead{display:flex; align-items:center; gap:10px; margin-bottom:12px}
+  section{margin-top:1.875rem}
+  .shead{display:flex; align-items:center; gap:0.625rem; margin-bottom:0.75rem}
   .shead h2{
-    font-size:12.5px; font-weight:700; margin:0; text-transform:uppercase;
-    letter-spacing:1.6px; color:var(--gold); white-space:nowrap;
+    font-size:0.78125rem; font-weight:700; margin:0; text-transform:uppercase;
+    letter-spacing:0.1em; color:var(--gold); white-space:nowrap;
   }
   .shead::after{content:""; flex:1; height:1px; background:var(--sep)}
 
   .card{
-    background:var(--card); border-radius:16px; padding:16px;
+    background:var(--card); border-radius:1rem; padding:1rem;
     box-shadow:0 1px 3px rgba(0,0,0,.05);
   }
-  .row{display:flex; gap:10px}
+  .row{display:flex; gap:0.625rem}
   input[type=text]{
-    flex:1; min-width:0; padding:12px 14px; font-size:16px; border-radius:12px;
+    flex:1; min-width:0; padding:0.75rem 0.875rem; font-size:1rem; border-radius:0.75rem;
     border:1px solid var(--sep); background:var(--bg); color:var(--ink); outline:none;
+    min-height:2.75rem;
   }
-  input[type=text]:focus{border-color:var(--gold)}
+  input[type=text]:focus-visible{outline:2px solid var(--focus); outline-offset:1px; border-color:var(--focus)}
   button.add{
-    padding:12px 18px; font-size:16px; font-weight:600; border:0; border-radius:12px;
-    background:var(--navy); color:#fff; cursor:pointer;
+    padding:0.75rem 1.125rem; font-size:1rem; font-weight:600; border:0; border-radius:0.75rem;
+    background:var(--navy); color:#fff; cursor:pointer; min-height:2.75rem; min-width:2.75rem;
   }
-  ul{list-style:none; margin:12px 0 0; padding:0}
-  li{display:flex; align-items:center; gap:8px; padding:12px 2px; border-top:1px solid var(--sep)}
+  ul{list-style:none; margin:0.75rem 0 0; padding:0}
+  li{display:flex; align-items:center; gap:0.5rem; padding:0.75rem 0.125rem; border-top:1px solid var(--sep)}
   li:first-child{border-top:0}
-  li .go{flex:1; text-align:left; font-size:16px; background:none; border:0; color:var(--ink); padding:0; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-  li .del{background:none; border:0; color:var(--sub); font-size:18px; padding:4px 8px; cursor:pointer}
-  .empty{color:var(--sub); font-size:14px; margin-top:10px}
+  li .go{flex:1; text-align:left; font-size:1rem; background:none; border:0; color:var(--ink); padding:0.25rem 0; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-height:2.75rem}
+  li .del{background:none; border:0; color:var(--sub); font-size:1.125rem; padding:0.5rem 0.75rem; cursor:pointer; min-height:2.75rem; min-width:2.75rem}
+  .empty{color:var(--sub); font-size:0.875rem; margin-top:0.625rem}
 
-  .panel{background:var(--card); border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .panel{background:var(--card); border-radius:1rem; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.05)}
   .panel a{
-    display:flex; align-items:center; gap:14px; padding:14px 16px;
+    display:flex; align-items:center; gap:0.875rem; padding:0.875rem 1rem; min-height:2.75rem;
     border-top:1px solid var(--sep); text-decoration:none; color:var(--ink);
   }
   .panel a:first-child{border-top:0}
   .panel a:active{background:var(--gold-soft)}
-  .panel .name{display:block; font-size:15.5px; font-weight:600; line-height:1.3}
-  .panel .desc{display:block; font-size:12.5px; color:var(--sub); margin-top:2px; line-height:1.4}
+  .panel .name{display:block; font-size:0.96875rem; font-weight:600; line-height:1.3}
+  .panel .desc{display:block; font-size:0.78125rem; color:var(--sub); margin-top:0.125rem; line-height:1.4}
   .panel .dot{
-    flex:0 0 auto; width:8px; height:8px; border-radius:50%;
-    background:var(--gold); opacity:.75; margin-right:2px;
+    flex:0 0 auto; width:0.5rem; height:0.5rem; border-radius:50%;
+    background:var(--gold); opacity:.75; margin-right:0.125rem;
   }
   .panel .chev{
-    flex:0 0 auto; margin-left:auto; color:var(--sub); font-size:20px; line-height:1;
+    flex:0 0 auto; margin-left:auto; color:var(--sub); font-size:1.25rem; line-height:1;
     font-family:Georgia,serif;
   }
 
-  .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:0.625rem}
   .grid a{
     display:flex; align-items:center; justify-content:center; text-align:center;
-    padding:13px 10px; border-radius:13px; background:var(--card); color:var(--ink);
-    text-decoration:none; font-size:14px; font-weight:500; line-height:1.3;
+    padding:0.8125rem 0.625rem; border-radius:0.8125rem; background:var(--card); color:var(--ink);
+    text-decoration:none; font-size:0.875rem; font-weight:500; line-height:1.3; min-height:2.75rem;
     box-shadow:0 1px 3px rgba(0,0,0,.05);
   }
   .grid a:active{transform:scale(.98)}
 
-  .about p{color:var(--sub); font-size:13px; line-height:1.55; margin:0 0 10px}
+  .about p{color:var(--sub); font-size:0.8125rem; line-height:1.55; margin:0 0 0.625rem}
   .about p:last-child{margin:0}
-  .about a{color:var(--gold); text-decoration:none; word-break:break-all}
+  .about a{color:var(--gold); text-decoration:underline; word-break:break-all}
 
-  .foot{margin-top:30px; color:var(--sub); font-size:12px; line-height:1.5; text-align:center; padding:0 8px}
+  .foot{margin-top:1.875rem; color:var(--sub); font-size:0.75rem; line-height:1.5; text-align:center; padding:0 0.5rem}
 
   #toast{
-    position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom) + 28px);
-    transform:translateX(-50%) translateY(20px); background:rgba(28,36,51,.94); color:#fff;
-    padding:10px 18px; border-radius:20px; font-size:14px; opacity:0; pointer-events:none;
+    position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom) + 1.75rem);
+    transform:translateX(-50%) translateY(1.25rem); background:rgba(28,36,51,.96); color:#fff;
+    padding:0.625rem 1.125rem; border-radius:1.25rem; font-size:0.875rem; opacity:0; pointer-events:none;
     transition:opacity .2s, transform .2s; max-width:80vw; text-align:center; z-index:9;
   }
   #toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; transform:none !important}
+  }
+  @media (min-width: 560px){
+    .grid{grid-template-columns:1fr 1fr 1fr 1fr}
+  }
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to main content</a>
 <div class="wrap">
 
 <header>
@@ -158,11 +182,11 @@
   </div>
   <p class="eyebrow">Duval County &middot; Florida</p>
   <h1>Duval Court Records</h1>
-  <p class="sub">Clerk of Courts portal access, statutes, forms &amp; research</p>
+  <p class="sub">Court records portal access, statutes, forms &amp; research for the bench, the bar and court staff</p>
   <div class="rule"></div>
 </header>
 
-<nav class="chips" aria-label="Sections">
+<nav class="chips" aria-label="Sections" aria-label-chips="">
   <a href="#portal">Portal</a>
   <a href="#tools">Case tools</a>
   <a href="#law">Law &amp; research</a>
@@ -172,6 +196,7 @@
   <a href="#about">Notices</a>
 </nav>
 
+<main id="main">
 <section id="portal">
   <div class="shead"><h2>Portal</h2></div>
   <a class="btn" id="openCore" href="https://core.duvalclerk.com/CoreCms.aspx?mode=PublicAccess" target="_blank" rel="noopener">Open the CORE portal</a>
@@ -187,7 +212,8 @@
 <section id="tools" class="card">
   <div class="shead"><h2>Case tools</h2></div>
   <div class="row">
-    <input id="q" type="text" placeholder="Name or case number" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <label class="sr" for="q" style="position:absolute;left:-9999px">Name or case number</label>
+    <input id="q" type="text" placeholder="Name or case number" aria-label="Name or case number" autocomplete="off" autocapitalize="off" spellcheck="false">
     <button class="add" id="add">Save</button>
   </div>
   <ul id="list"></ul>
@@ -198,44 +224,44 @@
   <div class="shead"><h2>Law &amp; research</h2></div>
   <div class="panel">
     <a href="reader.html">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">Statute reader</span><span class="desc">Read US Code and Florida Statutes in-app, official styling</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
     <a href="https://uscode.house.gov/" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">U.S. Code</span><span class="desc">Official current edition, Office of the Law Revision Counsel</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
     <a href="https://www.ecfr.gov/" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">Code of Federal Regulations</span><span class="desc">eCFR, the daily updated official version</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
     <a href="https://www.leg.state.fl.us/statutes/" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">Florida Statutes</span><span class="desc">Official site of the Florida Legislature</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
     <a href="https://www.flrules.org/" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">Florida Administrative Code</span><span class="desc">State agency rules</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
         <a href="https://www.ca11.uscourts.gov/eleventh-circuit-library" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">11th Circuit library</span><span class="desc">Eleventh Circuit opinions, rules and research links</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
 <a href="https://www.courtlistener.com/" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">CourtListener</span><span class="desc">Free opinions and dockets, federal and state</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
     <a href="https://www.jud4.org/duval-county-law-library" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">Duval County Law Library</span><span class="desc">4th Judicial Circuit legal research library</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
   </div>
 </section>
@@ -244,14 +270,14 @@
   <div class="shead"><h2>Forms &amp; self-help</h2></div>
   <div class="panel">
     <a href="https://www.duvalclerk.com/getmedia/c0682bbc-5153-49bf-b435-e0ca791255ca/SmallClaimsPacket_20200101_ADA_Compliant.pdf" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">Small claims packet</span><span class="desc">The Clerk's ADA-compliant filing packet, PDF</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
     <a href="https://www.jud4.org/court-programs/small-claims-clinics" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">Small claims clinics</span><span class="desc">Free clinics through the 4th Judicial Circuit</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
   </div>
 </section>
@@ -260,39 +286,39 @@
   <div class="shead"><h2>Courts &amp; resources</h2></div>
   <div class="panel">
     <a href="https://www.flcourts.gov/" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">Florida Courts</span><span class="desc">State court system, opinions and rules</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
     <a href="https://www.myflcourtaccess.com/" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">FL case search</span><span class="desc">Statewide court records access</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
     <a href="https://www.jud4.org/" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">4th Judicial Circuit</span><span class="desc">Duval, Clay and Nassau counties</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
     <a href="https://www2.miamidadeclerk.gov/QOS/" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">Miami-Dade search</span><span class="desc">Quick case search</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
     <a href="https://www.miamidadeclerk.gov/" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">Miami-Dade clerk</span><span class="desc">Clerk of Courts website</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
         <a href="https://www.uscourts.gov/" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">U.S. Courts</span><span class="desc">Federal judiciary, PACER fees and court forms</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
 <a href="https://www.floridabar.org/" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">Florida Bar</span><span class="desc">Attorney search, rules and practice resources</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
   </div>
 </section>
@@ -301,29 +327,29 @@
   <div class="shead"><h2>Accessibility resources</h2></div>
   <div class="panel">
     <a href="https://www.ada.gov/" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">ADA.gov</span><span class="desc">US Department of Justice ADA homepage</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
     <a href="https://www.access-board.gov/ict.html" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">Access Board Section 508</span><span class="desc">Electronic and information technology standards</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
     <a href="https://www.section508.gov/" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">Section508.gov</span><span class="desc">Federal accessibility guidance</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
     <a href="https://www.flcourts.gov/Services/information-technology/oit-resources/Court-Access" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">FL Courts court access</span><span class="desc">OIT resources for accessible court records</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
     <a href="http://web.archive.org/web/20211217071151/https://www.floridabar.org/about/diversity/efile001/" target="_blank" rel="noopener">
-      <span class="dot"></span>
+      <span class="dot" aria-hidden="true"></span>
       <span><span class="name">FL Bar accessibility (archive)</span><span class="desc">Archived Bar page on accessible e-filing</span></span>
-      <span class="chev">&rsaquo;</span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
     </a>
   </div>
 </section>
@@ -337,7 +363,8 @@
 
 <p class="foot">Unofficial launcher for the official Duval County Clerk CORE portal. Your searches stay on this device.</p>
 
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+</main>
 
 </div>
 
