@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Statute reader &middot; Duval Court Records</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Statutes">
+<meta name="theme-color" content="#0b2545">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="favicon.png">
+<style>
+  :root{
+    --bg:#f2f2f7; --card:#ffffff; --text:#1c1c1e; --sub:#6e6e73;
+    --navy:#0b2545; --navy2:#13315c; --blue:#0a84ff; --sep:rgba(60,60,67,.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#000; --card:#1c1c1e; --text:#f2f2f7; --sub:#98989f; --sep:rgba(255,255,255,.12); }
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+    background:var(--bg); color:var(--text); min-height:100dvh;
+    padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 24px);
+  }
+  .back{display:inline-block; color:var(--blue); text-decoration:none; font-size:15px; margin-bottom:10px}
+  h1{font-size:24px; font-weight:700; margin:0; letter-spacing:-.3px}
+  .sub{margin:4px 0 0; color:var(--sub); font-size:14px}
+  .card{
+    background:var(--card); border-radius:16px; padding:16px;
+    margin-top:18px; box-shadow:0 1px 3px rgba(0,0,0,.06);
+  }
+  .hint{color:var(--sub); font-size:13px; line-height:1.45; margin:10px 2px 0}
+  .row{display:flex; gap:10px}
+  input[type=text]{
+    flex:1; min-width:0; padding:12px 14px; font-size:16px; border-radius:12px;
+    border:1px solid var(--sep); background:var(--bg); color:var(--text); outline:none;
+  }
+  input[type=text]:focus{border-color:var(--blue)}
+  button.add{
+    padding:12px 18px; font-size:16px; font-weight:600; border:0; border-radius:12px;
+    background:var(--blue); color:#fff; cursor:pointer;
+  }
+  button.add:active{transform:scale(.98)}
+  #status{font-size:14px; color:var(--sub); margin:12px 2px 0; min-height:1.2em}
+  ul{list-style:none; margin:12px 0 0; padding:0}
+  li{display:flex; align-items:center; gap:8px; padding:11px 2px; border-top:1px solid var(--sep)}
+  li:first-child{border-top:0}
+  li .go{flex:1; text-align:left; font-size:15px; background:none; border:0; color:var(--text); padding:0; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  li .del{background:none; border:0; color:var(--sub); font-size:17px; padding:4px 8px; cursor:pointer}
+  #out[hidden]{display:none}
+  #meta{margin:0}
+  .pane{margin-top:12px}
+  .foot{margin-top:22px; color:var(--sub); font-size:12px; line-height:1.5; text-align:center}
+  #toast{
+    position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom) + 28px);
+    transform:translateX(-50%) translateY(20px); background:rgba(28,28,30,.92); color:#fff;
+    padding:10px 18px; border-radius:20px; font-size:14px; opacity:0; pointer-events:none;
+    transition:opacity .2s, transform .2s; max-width:80vw; text-align:center; z-index:9;
+  }
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+  .err{color:#c0392b; font-size:14px; line-height:1.5}
+</style>
+<link rel="stylesheet" href="usc-pane.css">
+</head>
+<body>
+<header>
+  <a class="back" href="index.html">&#8249; Duval Court Records</a>
+  <h1>Statute reader</h1>
+  <p class="sub">U.S. Code and Florida Statutes, readable in-app</p>
+</header>
+
+<section class="card">
+  <div class="row">
+    <input id="q" type="text" placeholder="42 usc 1983" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="text">
+    <button class="add" id="go">Read</button>
+  </div>
+  <p class="hint">US Code: &ldquo;42 usc 1983&rdquo; or just &ldquo;1983&rdquo;. Florida: &ldquo;837.06&rdquo;. Sections with letters work too, like 1320c-3.</p>
+  <div id="status"></div>
+  <ul id="recents"></ul>
+</section>
+
+<section class="card" id="out" hidden>
+  <div id="meta" class="docinfo"></div>
+  <div id="body" class="pane"></div>
+  <p class="hint" id="src"></p>
+</section>
+
+<p class="foot">Unofficial reader. Confirm against the official source before relying on it. Lookups stay on this device.</p>
+<div id="toast"></div>
+
+<script>
+const RAW_US='https://raw.githubusercontent.com/legalize-dev/legalize-us/main/us/';
+const CD_US='https://cdn.jsdelivr.net/gh/legalize-dev/legalize-us@main/us/';
+const RAW_FL='https://raw.githubusercontent.com/GMDEEP/open-law-us/main/';
+const CD_FL='https://cdn.jsdelivr.net/gh/GMDEEP/open-law-us@main/';
+const FLMAP={"1":["title-i","0001"],"2":["title-i","0002"],"6":["title-ii","0006"],"7":["title-ii","0007"],"8":["title-ii","0008"],"10":["title-iii","0010"],"11":["title-iii","0011"],"14":["title-iv","0014"],"15":["title-iv","0015"],"16":["title-iv","0016"],"17":["title-iv","0017"],"19":["title-iv","0019"],"20":["title-iv","0020"],"22":["title-iv","0022"],"23":["title-iv","0023"],"24":["title-iv","0024"],"25":["title-v","0025"],"26":["title-v","0026"],"27":["title-v","0027"],"28":["title-v","0028"],"29":["title-v","0029"],"30":["title-v","0030"],"34":["title-v","0034"],"35":["title-v","0035"],"38":["title-v","0038"],"39":["title-v","0039"],"40":["title-v","0040"],"43":["title-v","0043"],"44":["title-v","0044"],"45":["title-vi","0045"],"46":["title-vi","0046"],"47":["title-vi","0047"],"48":["title-vi","0048"],"49":["title-vi","0049"],"50":["title-vi","0050"],"51":["title-vi","0051"],"55":["title-vi","0055"],"56":["title-vi","0056"],"57":["title-vi","0057"],"59":["title-vi","0059"],"60":["title-vi","0060"],"61":["title-vi","0061"],"63":["title-vi","0063"],"64":["title-vi","0064"],"65":["title-vi","0065"],"66":["title-vi","0066"],"68":["title-vi","0068"],"69":["title-vi","0069"],"70":["title-vi","0070"],"71":["title-vi","0071"],"72":["title-vi","0072"],"73":["title-vi","0073"],"74":["title-vi","0074"],"75":["title-vi","0075"],"76":["title-vi","0076"],"77":["title-vi","0077"],"78":["title-vi","0078"],"79":["title-vi","0079"],"80":["title-vi","0080"],"81":["title-vi","0081"],"82":["title-vi","0082"],"83":["title-vi","0083"],"85":["title-vi","0085"],"86":["title-vi","0086"],"88":["title-vi","0088"],"90":["title-vii","0090"],"92":["title-vii","0092"],"95":["title-viii","0095"],"97":["title-ix","0097"],"98":["title-ix","0098"],"99":["title-ix","0099"],"100":["title-ix","0100"],"101":["title-ix","0101"],"102":["title-ix","0102"],"103":["title-ix","0103"],"104":["title-ix","0104"],"105":["title-ix","0105"],"106":["title-ix","0106"],"107":["title-ix","0107"],"110":["title-x","0110"],"111":["title-x","0111"],"112":["title-x","0112"],"113":["title-x","0113"],"114":["title-x","0114"],"115":["title-x","0115"],"116":["title-x","0116"],"117":["title-x","0117"],"118":["title-x","0118"],"119":["title-x","0119"],"120":["title-x","0120"],"121":["title-x","0121"],"122":["title-x","0122"],"124":["title-xi","0124"],"125":["title-xi","0125"],"127":["title-xi","0127"],"129":["title-xi","0129"],"130":["title-xi","0130"],"132":["title-xi","0132"],"136":["title-xi","0136"],"137":["title-xi","0137"],"138":["title-xi","0138"],"142":["title-xi","0142"],"145":["title-xi","0145"],"153":["title-xi","0153"],"154":["title-xi","0154"],"155":["title-xi","0155"],"157":["title-xi","0157"],"159":["title-xi","0159"],"161":["title-xi","0161"],"162":["title-xi","0162"],"163":["title-xi","0163"],"164":["title-xi","0164"],"165":["title-xii","0165"],"166":["title-xii","0166"],"170":["title-xii","0170"],"171":["title-xii","0171"],"173":["title-xii","0173"],"175":["title-xii","0175"],"177":["title-xii","0177"],"180":["title-xii","0180"],"185":["title-xii","0185"],"186":["title-xiii","0186"],"187":["title-xiii","0187"],"189":["title-xiii","0189"],"190":["title-xiii","0190"],"191":["title-xiii","0191"],"192":["title-xiv","0192"],"193":["title-xiv","0193"],"194":["title-xiv","0194"],"195":["title-xiv","0195"],"196":["title-xiv","0196"],"197":["title-xiv","0197"],"198":["title-xiv","0198"],"199":["title-xiv","0199"],"200":["title-xiv","0200"],"201":["title-xiv","0201"],"202":["title-xiv","0202"],"203":["title-xiv","0203"],"205":["title-xiv","0205"],"206":["title-xiv","0206"],"207":["title-xiv","0207"],"210":["title-xiv","0210"],"211":["title-xiv","0211"],"212":["title-xiv","0212"],"213":["title-xiv","0213"],"215":["title-xiv","0215"],"216":["title-xiv","0216"],"217":["title-xiv","0217"],"218":["title-xiv","0218"],"219":["title-xiv","0219"],"220":["title-xiv","0220"],"222":["title-xv","0222"],"238":["title-xvi","0238"],"243":["title-xvi","0243"],"250":["title-xvii","0250"],"251":["title-xvii","0251"],"252":["title-xvii","0252"],"253":["title-xviii","0253"],"255":["title-xviii","0255"],"256":["title-xviii","0256"],"257":["title-xviii","0257"],"258":["title-xviii","0258"],"259":["title-xviii","0259"],"260":["title-xviii","0260"],"261":["title-xviii","0261"],"265":["title-xviii","0265"],"267":["title-xviii","0267"],"270":["title-xviii","0270"],"272":["title-xviii","0272"],"273":["title-xviii","0273"],"274":["title-xviii","0274"],"279":["title-xix","0279"],"280":["title-xix","0280"],"281":["title-xix","0281"],"282":["title-xix","0282"],"283":["title-xix","0283"],"284":["title-xix","0284"],"285":["title-xix","0285"],"286":["title-xix","0286"],"287":["title-xix","0287"],"288":["title-xix","0288"],"290":["title-xix","0290"],"292":["title-xx","0292"],"295":["title-xx","0295"],"296":["title-xx","0296"],"298":["title-xxi","0298"],"308":["title-xxii","0308"],"309":["title-xxii","0309"],"310":["title-xxii","0310"],"311":["title-xxii","0311"],"313":["title-xxii","0313"],"314":["title-xxii","0314"],"315":["title-xxii","0315"],"316":["title-xxiii","0316"],"317":["title-xxiii","0317"],"318":["title-xxiii","0318"],"319":["title-xxiii","0319"],"320":["title-xxiii","0320"],"321":["title-xxiii","0321"],"322":["title-xxiii","0322"],"323":["title-xxiii","0323"],"324":["title-xxiii","0324"],"326":["title-xxiv","0326"],"327":["title-xxiv","0327"],"328":["title-xxiv","0328"],"329":["title-xxv","0329"],"330":["title-xxv","0330"],"331":["title-xxv","0331"],"332":["title-xxv","0332"],"333":["title-xxv","0333"],"334":["title-xxvi","0334"],"335":["title-xxvi","0335"],"336":["title-xxvi","0336"],"337":["title-xxvi","0337"],"338":["title-xxvi","0338"],"339":["title-xxvi","0339"],"341":["title-xxvi","0341"],"342":["title-xxvi","0342"],"343":["title-xxvi","0343"],"344":["title-xxvi","0344"],"347":["title-xxvi","0347"],"348":["title-xxvi","0348"],"349":["title-xxvi","0349"],"350":["title-xxvii","0350"],"351":["title-xxvii","0351"],"354":["title-xxvii","0354"],"361":["title-xxvii","0361"],"362":["title-xxvii","0362"],"364":["title-xxvii","0364"],"365":["title-xxvii","0365"],"366":["title-xxvii","0366"],"367":["title-xxvii","0367"],"368":["title-xxvii","0368"],"369":["title-xxviii","0369"],"373":["title-xxviii","0373"],"374":["title-xxviii","0374"],"375":["title-xxviii","0375"],"376":["title-xxviii","0376"],"377":["title-xxviii","0377"],"378":["title-xxviii","0378"],"379":["title-xxviii","0379"],"380":["title-xxviii","0380"],"381":["title-xxix","0381"],"382":["title-xxix","0382"],"383":["title-xxix","0383"],"384":["title-xxix","0384"],"385":["title-xxix","0385"],"386":["title-xxix","0386"],"388":["title-xxix","0388"],"390":["title-xxix","0390"],"391":["title-xxix","0391"],"392":["title-xxix","0392"],"393":["title-xxix","0393"],"394":["title-xxix","0394"],"395":["title-xxix","0395"],"397":["title-xxix","0397"],"399":["title-xxix","0399"],"400":["title-xxix","0400"],"401":["title-xxix","0401"],"402":["title-xxix","0402"],"403":["title-xxix","0403"],"404":["title-xxix","0404"],"405":["title-xxix","0405"],"406":["title-xxix","0406"],"408":["title-xxix","0408"],"409":["title-xxx","0409"],"410":["title-xxx","0410"],"411":["title-xxx","0411"],"413":["title-xxx","0413"],"414":["title-xxx","0414"],"415":["title-xxx","0415"],"418":["title-xxx","0418"],"419":["title-xxx","0419"],"420":["title-xxx","0420"],"421":["title-xxx","0421"],"422":["title-xxx","0422"],"423":["title-xxx","0423"],"425":["title-xxx","0425"],"427":["title-xxx","0427"],"429":["title-xxx","0429"],"430":["title-xxx","0430"],"435":["title-xxxi","0435"],"440":["title-xxxi","0440"],"441":["title-xxxi","0441"],"443":["title-xxxi","0443"],"445":["title-xxxi","0445"],"446":["title-xxxi","0446"],"447":["title-xxxi","0447"],"448":["title-xxxi","0448"],"450":["title-xxxi","0450"],"451":["title-xxxi","0451"],"452":["title-xxxi","0452"],"454":["title-xxxii","0454"],"455":["title-xxxii","0455"],"456":["title-xxxii","0456"],"457":["title-xxxii","0457"],"458":["title-xxxii","0458"],"459":["title-xxxii","0459"],"460":["title-xxxii","0460"],"461":["title-xxxii","0461"],"462":["title-xxxii","0462"],"463":["title-xxxii","0463"],"464":["title-xxxii","0464"],"465":["title-xxxii","0465"],"466":["title-xxxii","0466"],"467":["title-xxxii","0467"],"468":["title-xxxii","0468"],"469":["title-xxxii","0469"],"471":["title-xxxii","0471"],"472":["title-xxxii","0472"],"473":["title-xxxii","0473"],"474":["title-xxxii","0474"],"475":["title-xxxii","0475"],"476":["title-xxxii","0476"],"477":["title-xxxii","0477"],"478":["title-xxxii","0478"],"479":["title-xxxii","0479"],"480":["title-xxxii","0480"],"481":["title-xxxii","0481"],"482":["title-xxxii","0482"],"483":["title-xxxii","0483"],"484":["title-xxxii","0484"],"485":["title-xxxii","0485"],"486":["title-xxxii","0486"],"487":["title-xxxii","0487"],"488":["title-xxxii","0488"],"489":["title-xxxii","0489"],"490":["title-xxxii","0490"],"491":["title-xxxii","0491"],"492":["title-xxxii","0492"],"493":["title-xxxii","0493"],"494":["title-xxxiii","0494"],"495":["title-xxxiii","0495"],"496":["title-xxxiii","0496"],"497":["title-xxxiii","0497"],"499":["title-xxxiii","0499"],"500":["title-xxxiii","0500"],"501":["title-xxxiii","0501"],"502":["title-xxxiii","0502"],"504":["title-xxxiii","0504"],"506":["title-xxxiii","0506"],"507":["title-xxxiii","0507"],"509":["title-xxxiii","0509"],"513":["title-xxxiii","0513"],"514":["title-xxxiii","0514"],"515":["title-xxxiii","0515"],"516":["title-xxxiii","0516"],"517":["title-xxxiii","0517"],"518":["title-xxxiii","0518"],"519":["title-xxxiii","0519"],"520":["title-xxxiii","0520"],"521":["title-xxxiii","0521"],"522":["title-xxxiii","0522"],"525":["title-xxxiii","0525"],"526":["title-xxxiii","0526"],"527":["title-xxxiii","0527"],"531":["title-xxxiii","0531"],"532":["title-xxxiii","0532"],"534":["title-xxxiii","0534"],"535":["title-xxxiii","0535"],"536":["title-xxxiii","0536"],"537":["title-xxxiii","0537"],"538":["title-xxxiii","0538"],"539":["title-xxxiii","0539"],"540":["title-xxxiii","0540"],"542":["title-xxxiii","0542"],"545":["title-xxxiii","0545"],"546":["title-xxxiii","0546"],"548":["title-xxxiii","0548"],"549":["title-xxxiii","0549"],"550":["title-xxxiii","0550"],"551":["title-xxxiii","0551"],"552":["title-xxxiii","0552"],"553":["title-xxxiii","0553"],"554":["title-xxxiii","0554"],"556":["title-xxxiii","0556"],"558":["title-xxxiii","0558"],"559":["title-xxxiii","0559"],"560":["title-xxxiii","0560"],"561":["title-xxxiv","0561"],"562":["title-xxxiv","0562"],"563":["title-xxxiv","0563"],"564":["title-xxxiv","0564"],"565":["title-xxxiv","0565"],"567":["title-xxxiv","0567"],"568":["title-xxxiv","0568"],"569":["title-xxxiv","0569"],"570":["title-xxxv","0570"],"571":["title-xxxv","0571"],"573":["title-xxxv","0573"],"574":["title-xxxv","0574"],"576":["title-xxxv","0576"],"578":["title-xxxv","0578"],"580":["title-xxxv","0580"],"581":["title-xxxv","0581"],"582":["title-xxxv","0582"],"583":["title-xxxv","0583"],"585":["title-xxxv","0585"],"586":["title-xxxv","0586"],"588":["title-xxxv","0588"],"589":["title-xxxv","0589"],"590":["title-xxxv","0590"],"591":["title-xxxv","0591"],"593":["title-xxxv","0593"],"595":["title-xxxv","0595"],"597":["title-xxxv","0597"],"599":["title-xxxv","0599"],"600":["title-xxxv","0600"],"601":["title-xxxv","0601"],"603":["title-xxxv","0603"],"604":["title-xxxv","0604"],"605":["title-xxxvi","0605"],"606":["title-xxxvi","0606"],"607":["title-xxxvi","0607"],"609":["title-xxxvi","0609"],"610":["title-xxxvi","0610"],"616":["title-xxxvi","0616"],"617":["title-xxxvi","0617"],"618":["title-xxxvi","0618"],"619":["title-xxxvi","0619"],"620":["title-xxxvi","0620"],"621":["title-xxxvi","0621"],"622":["title-xxxvi","0622"],"623":["title-xxxvi","0623"],"624":["title-xxxvii","0624"],"625":["title-xxxvii","0625"],"626":["title-xxxvii","0626"],"627":["title-xxxvii","0627"],"628":["title-xxxvii","0628"],"629":["title-xxxvii","0629"],"630":["title-xxxvii","0630"],"631":["title-xxxvii","0631"],"632":["title-xxxvii","0632"],"633":["title-xxxvii","0633"],"634":["title-xxxvii","0634"],"635":["title-xxxvii","0635"],"636":["title-xxxvii","0636"],"641":["title-xxxvii","0641"],"642":["title-xxxvii","0642"],"647":["title-xxxvii","0647"],"648":["title-xxxvii","0648"],"650":["title-xxxvii","0650"],"651":["title-xxxvii","0651"],"655":["title-xxxviii","0655"],"657":["title-xxxviii","0657"],"658":["title-xxxviii","0658"],"660":["title-xxxviii","0660"],"662":["title-xxxviii","0662"],"663":["title-xxxviii","0663"],"665":["title-xxxviii","0665"],"667":["title-xxxviii","0667"],"668":["title-xxxix","0668"],"669":["title-xxxix","0669"],"670":["title-xxxix","0670"],"671":["title-xxxix","0671"],"672":["title-xxxix","0672"],"673":["title-xxxix","0673"],"674":["title-xxxix","0674"],"675":["title-xxxix","0675"],"677":["title-xxxix","0677"],"678":["title-xxxix","0678"],"679":["title-xxxix","0679"],"680":["title-xxxix","0680"],"681":["title-xxxix","0681"],"682":["title-xxxix","0682"],"683":["title-xxxix","0683"],"684":["title-xxxix","0684"],"685":["title-xxxix","0685"],"686":["title-xxxix","0686"],"687":["title-xxxix","0687"],"688":["title-xxxix","0688"],"689":["title-xl","0689"],"692":["title-xl","0692"],"694":["title-xl","0694"],"695":["title-xl","0695"],"696":["title-xl","0696"],"697":["title-xl","0697"],"698":["title-xl","0698"],"701":["title-xl","0701"],"702":["title-xl","0702"],"703":["title-xl","0703"],"704":["title-xl","0704"],"705":["title-xl","0705"],"707":["title-xl","0707"],"708":["title-xl","0708"],"709":["title-xl","0709"],"710":["title-xl","0710"],"711":["title-xl","0711"],"712":["title-xl","0712"],"713":["title-xl","0713"],"714":["title-xl","0714"],"715":["title-xl","0715"],"716":["title-xl","0716"],"717":["title-xl","0717"],"718":["title-xl","0718"],"719":["title-xl","0719"],"720":["title-xl","0720"],"721":["title-xl","0721"],"723":["title-xl","0723"],"725":["title-xli","0725"],"726":["title-xli","0726"],"727":["title-xli","0727"],"731":["title-xlii","0731"],"732":["title-xlii","0732"],"733":["title-xlii","0733"],"734":["title-xlii","0734"],"735":["title-xlii","0735"],"736":["title-xlii","0736"],"738":["title-xlii","0738"],"739":["title-xlii","0739"],"740":["title-xlii","0740"],"741":["title-xliii","0741"],"742":["title-xliii","0742"],"743":["title-xliii","0743"],"744":["title-xliii","0744"],"747":["title-xliii","0747"],"751":["title-xliii","0751"],"752":["title-xliii","0752"],"753":["title-xliii","0753"],"760":["title-xliv","0760"],"761":["title-xliv","0761"],"765":["title-xliv","0765"],"766":["title-xlv","0766"],"767":["title-xlv","0767"],"768":["title-xlv","0768"],"769":["title-xlv","0769"],"770":["title-xlv","0770"],"771":["title-xlv","0771"],"772":["title-xlv","0772"],"773":["title-xlv","0773"],"774":["title-xlv","0774"],"775":["title-xlvi","0775"],"776":["title-xlvi","0776"],"777":["title-xlvi","0777"],"782":["title-xlvi","0782"],"784":["title-xlvi","0784"],"787":["title-xlvi","0787"],"790":["title-xlvi","0790"],"791":["title-xlvi","0791"],"794":["title-xlvi","0794"],"796":["title-xlvi","0796"],"797":["title-xlvi","0797"],"798":["title-xlvi","0798"],"800":["title-xlvi","0800"],"806":["title-xlvi","0806"],"810":["title-xlvi","0810"],"811":["title-xlvi","0811"],"812":["title-xlvi","0812"],"815":["title-xlvi","0815"],"817":["title-xlvi","0817"],"818":["title-xlvi","0818"],"823":["title-xlvi","0823"],"825":["title-xlvi","0825"],"826":["title-xlvi","0826"],"827":["title-xlvi","0827"],"828":["title-xlvi","0828"],"831":["title-xlvi","0831"],"832":["title-xlvi","0832"],"836":["title-xlvi","0836"],"837":["title-xlvi","0837"],"838":["title-xlvi","0838"],"839":["title-xlvi","0839"],"843":["title-xlvi","0843"],"847":["title-xlvi","0847"],"849":["title-xlvi","0849"],"856":["title-xlvi","0856"],"859":["title-xlvi","0859"],"860":["title-xlvi","0860"],"861":["title-xlvi","0861"],"865":["title-xlvi","0865"],"870":["title-xlvi","0870"],"871":["title-xlvi","0871"],"872":["title-xlvi","0872"],"873":["title-xlvi","0873"],"874":["title-xlvi","0874"],"876":["title-xlvi","0876"],"877":["title-xlvi","0877"],"893":["title-xlvi","0893"],"895":["title-xlvi","0895"],"896":["title-xlvi","0896"],"900":["title-xlvii","0900"],"901":["title-xlvii","0901"],"902":["title-xlvii","0902"],"903":["title-xlvii","0903"],"905":["title-xlvii","0905"],"907":["title-xlvii","0907"],"908":["title-xlvii","0908"],"910":["title-xlvii","0910"],"913":["title-xlvii","0913"],"914":["title-xlvii","0914"],"916":["title-xlvii","0916"],"918":["title-xlvii","0918"],"921":["title-xlvii","0921"],"922":["title-xlvii","0922"],"923":["title-xlvii","0923"],"924":["title-xlvii","0924"],"925":["title-xlvii","0925"],"932":["title-xlvii","0932"],"933":["title-xlvii","0933"],"934":["title-xlvii","0934"],"936":["title-xlvii","0936"],"937":["title-xlvii","0937"],"938":["title-xlvii","0938"],"939":["title-xlvii","0939"],"940":["title-xlvii","0940"],"941":["title-xlvii","0941"],"942":["title-xlvii","0942"],"943":["title-xlvii","0943"],"944":["title-xlvii","0944"],"945":["title-xlvii","0945"],"946":["title-xlvii","0946"],"947":["title-xlvii","0947"],"948":["title-xlvii","0948"],"949":["title-xlvii","0949"],"950":["title-xlvii","0950"],"951":["title-xlvii","0951"],"957":["title-xlvii","0957"],"958":["title-xlvii","0958"],"960":["title-xlvii","0960"],"961":["title-xlvii","0961"],"984":["title-xlvii","0984"],"985":["title-xlvii","0985"],"1000":["title-xlviii","1000"],"1001":["title-xlviii","1001"],"1002":["title-xlviii","1002"],"1003":["title-xlviii","1003"],"1004":["title-xlviii","1004"],"1005":["title-xlviii","1005"],"1006":["title-xlviii","1006"],"1007":["title-xlviii","1007"],"1008":["title-xlviii","1008"],"1009":["title-xlviii","1009"],"1010":["title-xlviii","1010"],"1011":["title-xlviii","1011"],"1012":["title-xlviii","1012"],"1013":["title-xlviii","1013"],"1014":["title-xlix","1014"],"1015":["title-xlix","1015"]};
+const KEY='duval-statutes-recents';
+const CKEY='duval-statutes-texts';
+const qEl=document.getElementById('q');
+const statusEl=document.getElementById('status');
+const recentsEl=document.getElementById('recents');
+const out=document.getElementById('out');
+const metaEl=document.getElementById('meta');
+const bodyEl=document.getElementById('body');
+const srcEl=document.getElementById('src');
+let recents=[], texts={};
+try{ recents=JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(e){ recents=[]; }
+try{ texts=JSON.parse(localStorage.getItem(CKEY)||'{}'); }catch(e){ texts={}; }
+function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(recents)); }catch(e){} }
+function persistTexts(){ try{ localStorage.setItem(CKEY, JSON.stringify(texts)); }catch(e){ texts={}; } }
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(function(){ t.classList.remove('show'); },1800);
+}
+function lastTitle(){
+  for(const r of recents){ if(r.mode==='us') return r.t; }
+  return 42;
+}
+function saveLastTitle(t){ /* stored via recents */ }
+function parseCite(raw){
+  let s=(raw||'').trim().toLowerCase().replace(/\u00a7/g,' ');
+  s=s.replace(/\bfla?\.?\b|\bflorida\b|\bstats?\b|\bstat\.?\b|\bf\.?s\.?\b/g,' ').replace(/[,()"]/g,' ').trim();
+  if(!s) return null;
+  if(s.indexOf('usc')>=0 || /(^|\s)(us|u\.s)\.?($|\s)/.test(s)) return usCite(s);
+  const dot=s.match(/\d{1,3}\.\d{1,6}/);
+  if(dot) return flCite(dot[0]);
+  if(s.indexOf('fl')>=0) return {err:'Type the full Florida section, like 837.06.'};
+  return usCite(s);
+}
+function usCite(s){
+  const toks=s.split(/[^a-z0-9\-]+/).filter(Boolean);
+  const nums=toks.filter(function(x){ return /^\d/.test(x); });
+  const ui=toks.indexOf('usc');
+  let t=null, sec=null;
+  if(nums.length>=2){ t=nums[0]; sec=nums[1]; }
+  else if(nums.length===1){
+    if(ui>0 && /^\d/.test(toks[ui-1])){ t=toks[ui-1]; sec=nums[0]; }
+    else { t=String(lastTitle()); sec=nums[0]; }
+  }
+  if(t===null||sec===null) return {err:'Try \u201c42 usc 1983\u201d.'};
+  t=parseInt(t,10);
+  if(!(t>=1&&t<=54)) return {err:'US Code titles run 1 through 54.'};
+  sec=sec.replace(/[^a-z0-9\-]/g,'');
+  return {mode:'us', t:t, s:sec};
+}
+function flCite(sec){
+  const m=sec.match(/(\d{1,3})\.(\d{1,6})/);
+  if(!m) return {err:'Type the full Florida section, like 837.06.'};
+  const full=m[0], chap=m[1];
+  const e=FLMAP[chap];
+  if(!e) return {err:'Florida chapter '+chap+' is not in the 2026 edition mirror.'};
+  return {mode:'fl', s:full, path:'states/fl/statutes/'+e[0]+'/chapter-'+e[1]+'/'+full+'.md'};
+}
+function cacheKey(c){
+  return c.mode==='us' ? 'us:'+c.t+':'+c.s : 'fl:'+c.s;
+}
+async function fetchFirst(urls){
+  let last=null;
+  for(let i=0;i<urls.length;i++){
+    try{
+      const r=await fetch(urls[i]);
+      if(r.ok) return await r.text();
+      last=new Error('HTTP '+r.status);
+    }catch(e){ last=e; }
+  }
+  throw last||new Error('fetch failed');
+}
+function esc(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function inline(t){
+  t=esc(t);
+  t=t.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  t=t.replace(/\[([^\]]+)\]\(([^)]*)\)/g,'$1');
+  t=t.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');
+  return t;
+}
+function splitFM(text){
+  const m=text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+  if(!m) return {meta:{}, body:text};
+  const meta={}; let k=null;
+  m[1].split(/\r?\n/).forEach(function(line){
+    if(/^\s/.test(line) && k){ meta[k]+=' '+line.trim(); return; }
+    const i=line.indexOf(':');
+    if(i>0){ k=line.slice(0,i).trim(); let v=line.slice(i+1).trim(); v=v.replace(/^"+|"+$/g,'').replace(/^'+|'+$/g,''); meta[k]=v; }
+  });
+  return {meta:meta, body:m[2]};
+}
+function md2html(body){
+  const outp=[];
+  const blocks=body.split(/\n\s*\n/);
+  for(let i=0;i<blocks.length;i++){
+    let blk=blocks[i].replace(/\r/g,'').trim();
+    if(!blk) continue;
+    const lines=blk.split(/\n+/).map(function(x){ return x.trim(); }).filter(Boolean);
+    if(lines.length===1 && /^#{1,6}\s*$/.test(lines[0])) continue;
+    const hm=lines[0].match(/^#{1,6}\s+(.*)$/);
+    if(hm){
+      const lvl=lines[0].match(/^#+/)[0].length;
+      const inner=inline(hm[1]);
+      outp.push(lvl<=1 ? '<h2 class="sec-head">'+inner+'</h2>' : '<h3 class="note-head">'+inner+'</h3>');
+      continue;
+    }
+    outp.push('<div class="statutory-body">'+lines.map(inline).join(' ')+'</div>');
+  }
+  return outp.join('\n');
+}
+function label(c){
+  return c.mode==='us' ? ('§ '+c.s+' of Title '+c.t+', U.S. Code') : ('Fla. Stat. § '+c.s);
+}
+function setRecents(){
+  recentsEl.innerHTML='';
+  if(!recents.length) return;
+  recents.forEach(function(r,i){
+    const li=document.createElement('li');
+    const go=document.createElement('button');
+    go.className='go'; go.textContent=r.label;
+    go.addEventListener('click',function(){ run(r.input); });
+    const del=document.createElement('button');
+    del.className='del'; del.textContent='\u2715'; del.setAttribute('aria-label','Delete');
+    del.addEventListener('click',function(){ recents.splice(i,1); persist(); setRecents(); });
+    li.appendChild(go); li.appendChild(del); recentsEl.appendChild(li);
+  });
+}
+function addRecent(input, lab){
+  recents=recents.filter(function(r){ return r.input!==input; });
+  recents.unshift({input:input, label:lab});
+  recents=recents.slice(0,10);
+  persist(); setRecents();
+}
+async function run(raw){
+  const c=parseCite(raw);
+  if(!c) return;
+  if(c.err){ statusEl.innerHTML=''; out.hidden=false; metaEl.innerHTML=''; bodyEl.innerHTML='<p class="err">'+esc(c.err)+'</p>'; srcEl.textContent=''; return; }
+  const lab=label(c);
+  statusEl.textContent='Looking up '+lab+'\u2026';
+  const ck=cacheKey(c);
+  let text=null, fromCache=false;
+  if(texts[ck]){ text=texts[ck]; fromCache=true; }
+  if(!text){
+    let urls;
+    if(c.mode==='us') urls=[RAW_US+'USC-T'+c.t+'-S'+c.s+'.md', CD_US+'USC-T'+c.t+'-S'+c.s+'.md'];
+    else urls=[RAW_FL+c.path, CD_FL+c.path];
+    try{ text=await fetchFirst(urls); }
+    catch(e){
+      statusEl.textContent='';
+      out.hidden=false; metaEl.innerHTML='';
+      let extra='';
+      if(c.mode==='us') extra=' Try <a href="https://www.law.cornell.edu/uscode/text/'+c.t+'/'+encodeURIComponent(c.s)+'" target="_blank" rel="noopener">Cornell LII</a>.';
+      else extra=' Try <a href="https://www.flsenate.gov/Laws/Statutes/2025/'+encodeURIComponent(c.s)+'" target="_blank" rel="noopener">flsenate.gov</a>.';
+      bodyEl.innerHTML='<p class="err">Could not load '+esc(lab)+'. Check the citation.'+extra+'</p>';
+      srcEl.textContent='';
+      return;
+    }
+    if(text.length<300000){ texts[ck]=text; pruneTexts(); persistTexts(); }
+  }
+  const p=splitFM(text);
+  statusEl.textContent='';
+  let metaHtml='<div><b>'+esc(p.meta.citation||lab)+'</b></div>';
+  metaHtml+='<div>'+esc([p.meta.edition?('Florida Statutes, '+p.meta.edition+' edition'):(p.meta.release_point?('OLRC release point '+p.meta.release_point):'') ,
+                        p.meta.last_updated?('updated '+p.meta.last_updated):''].filter(Boolean).join(' \u00b7 '))+'</div>';
+  metaEl.innerHTML=metaHtml;
+  bodyEl.innerHTML=md2html(p.body);
+  const off=p.meta.source||p.meta.source_url||'';
+  let srcHtml='';
+  if(off){ srcHtml='Official source: <a href="'+esc(off)+'" target="_blank" rel="noopener">'+esc(off.replace(/^https?:\/\//,'').slice(0,60))+'</a>'; }
+  if(p.meta.source_credit){ srcHtml+=(srcHtml?' &middot; ':'')+'Credit: '+inline(p.meta.source_credit); }
+  if(p.meta.retrieved_at){ srcHtml+=(srcHtml?' &middot; ':'')+'mirror retrieved '+esc(p.meta.retrieved_at); }
+  srcEl.innerHTML=srcHtml;
+  out.hidden=false;
+  if(fromCache) toast('Loaded from this device');
+  addRecent(raw.trim(), (p.meta.citation||lab));
+  try{ out.scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){}
+}
+function pruneTexts(){
+  const keys=Object.keys(texts);
+  if(keys.length<=14) return;
+  keys.slice(0, keys.length-14).forEach(function(k){ delete texts[k]; });
+}
+document.getElementById('go').addEventListener('click',function(){ run(qEl.value); });
+qEl.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); run(qEl.value); } });
+setRecents();
+if(recents.length){ run(recents[0].input); }
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js', {updateViaCache: 'none'}).then(function(r) {
+    r.addEventListener('updatefound', function() {
+      var w = r.installing;
+      if (!w) return;
+      w.addEventListener('statechange', function() {
+        if (w.state === 'activated' && !sessionStorage.getItem('swre')) {
+          sessionStorage.setItem('swre', '1');
+          location.reload();
+        }
+      });
+    });
+  });
+}
+</script>
+</body>
+</html>

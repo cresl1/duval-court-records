@@ -1,0 +1,23 @@
+/* Pane styling adapted from the official U.S. Code stylesheet (usc.css, uscode.house.gov). */
+.pane{
+  font-family:"Times New Roman", Times, Georgia, serif;
+  font-size:16px; line-height:1.5; color:#1c1c1e;
+  background:#f7f2e6; padding:16px 14px; border-radius:12px;
+  -webkit-overflow-scrolling:touch;
+}
+@media (prefers-color-scheme: dark){
+  .pane{ background:#221e14; color:#f2f2f7; }
+}
+.pane .sec-head{ text-align:center; font-size:19px; font-weight:bold; margin:4px 0 12px; }
+.pane .note-head{ font-size:15px; font-weight:bold; margin:16px 0 6px; }
+.pane .statutory-body{ margin:0 0 10px; text-indent:1em; }
+.pane .source-credit{ margin:0 0 12px; text-indent:0; color:#55524a; font-size:13px; }
+@media (prefers-color-scheme: dark){ .pane .source-credit{ color:#b8b4a6; } }
+.pane .docinfo{
+  margin:0 0 12px; padding:8px 2px;
+  border-top:1px solid #9a9584; border-bottom:1px solid #9a9584;
+  color:#6e6a5e; font-size:11px; line-height:1.6;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){ .pane .docinfo{ color:#b8b4a6; border-color:#57534a; } }
+.pane a{ color:#0a84ff; }
