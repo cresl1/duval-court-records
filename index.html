@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Duval Court Records</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Duval Courts">
+<meta name="theme-color" content="#0b2545">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="favicon.png">
+<style>
+  :root{
+    --bg:#f2f2f7; --card:#ffffff; --text:#1c1c1e; --sub:#6e6e73;
+    --navy:#0b2545; --navy2:#13315c; --blue:#0a84ff; --sep:rgba(60,60,67,.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#000; --card:#1c1c1e; --text:#f2f2f7; --sub:#98989f; --sep:rgba(255,255,255,.12); }
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+    background:var(--bg); color:var(--text); min-height:100dvh;
+    padding:calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 24px);
+  }
+  header{padding:6px 4px 18px}
+  h1{font-size:26px; font-weight:700; margin:0; letter-spacing:-.4px}
+  .sub{margin:4px 0 0; color:var(--sub); font-size:14px}
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    width:100%; padding:16px; border-radius:14px; border:0;
+    background:linear-gradient(180deg,var(--navy2),var(--navy)); color:#fff;
+    font-size:17px; font-weight:600; text-decoration:none;
+    box-shadow:0 6px 16px rgba(11,37,69,.28); cursor:pointer;
+  }
+  .btn:active{transform:scale(.98)}
+  .hint{color:var(--sub); font-size:13px; line-height:1.45; margin:10px 2px 0}
+  .card{
+    background:var(--card); border-radius:16px; padding:16px;
+    margin-top:22px; box-shadow:0 1px 3px rgba(0,0,0,.06);
+  }
+  h2{font-size:15px; font-weight:600; margin:0 0 12px; text-transform:uppercase; letter-spacing:.5px; color:var(--sub)}
+  .row{display:flex; gap:10px}
+  input[type=text]{
+    flex:1; min-width:0; padding:12px 14px; font-size:16px; border-radius:12px;
+    border:1px solid var(--sep); background:var(--bg); color:var(--text); outline:none;
+  }
+  input[type=text]:focus{border-color:var(--blue)}
+  button.add{
+    padding:12px 18px; font-size:16px; font-weight:600; border:0; border-radius:12px;
+    background:var(--blue); color:#fff; cursor:pointer;
+  }
+  ul{list-style:none; margin:12px 0 0; padding:0}
+  li{display:flex; align-items:center; gap:8px; padding:12px 2px; border-top:1px solid var(--sep)}
+  li:first-child{border-top:0}
+  li .go{flex:1; text-align:left; font-size:16px; background:none; border:0; color:var(--text); padding:0; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  li .del{background:none; border:0; color:var(--sub); font-size:18px; padding:4px 8px; cursor:pointer}
+  .empty{color:var(--sub); font-size:14px; margin-top:10px}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:22px}
+  .grid a{
+    display:flex; align-items:center; justify-content:center; padding:14px;
+    border-radius:14px; background:var(--card); color:var(--text); text-decoration:none;
+    font-size:15px; font-weight:500; box-shadow:0 1px 3px rgba(0,0,0,.06);
+  }
+  .grid a:active{transform:scale(.98)}
+  .foot{margin-top:26px; color:var(--sub); font-size:12px; line-height:1.5; text-align:center}
+  #toast{
+    position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom) + 28px);
+    transform:translateX(-50%) translateY(20px); background:rgba(28,28,30,.92); color:#fff;
+    padding:10px 18px; border-radius:20px; font-size:14px; opacity:0; pointer-events:none;
+    transition:opacity .2s, transform .2s; max-width:80vw; text-align:center; z-index:9;
+  }
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Duval Court Records</h1>
+  <p class="sub">Duval County Clerk of Courts &middot; CORE portal</p>
+</header>
+
+<a class="btn" id="openCore" href="https://core.duvalclerk.com/CoreCms.aspx?mode=PublicAccess" target="_blank" rel="noopener">Open the CORE portal</a>
+<p class="hint">Opens the official portal in Safari. Sign in there with your own account.</p>
+
+<section class="card">
+  <h2>Saved searches</h2>
+  <div class="row">
+    <input id="q" type="text" placeholder="Name or case number" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <button class="add" id="add">Save</button>
+  </div>
+  <ul id="list"></ul>
+  <p class="hint">Tap a saved search to copy it and jump to the portal, then paste it into the search box.</p>
+</section>
+
+<section class="grid">
+  <a href="https://core.duvalclerk.com/CoreCms.aspx" target="_blank" rel="noopener">CORE login</a>
+  <a href="https://core.duvalclerk.com/CreateAccount.aspx" target="_blank" rel="noopener">Create account</a>
+  <a href="https://core.duvalclerk.com/" target="_blank" rel="noopener">CORE home</a>
+  <a href="https://www.duvalclerk.com/" target="_blank" rel="noopener">Clerk website</a>
+</section>
+
+<p class="foot">Unofficial launcher for the official Duval County Clerk CORE portal. Your searches stay on this device.</p>
+
+<div id="toast"></div>
+<script>
+const CORE='https://core.duvalclerk.com/CoreCms.aspx?mode=PublicAccess';
+const KEY='duval-searches';
+const listEl=document.getElementById('list');
+const qEl=document.getElementById('q');
+let saved=[];
+try{ saved=JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(e){ saved=[]; }
+
+function persist(){ localStorage.setItem(KEY, JSON.stringify(saved)); }
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),1800);
+}
+function render(){
+  listEl.innerHTML='';
+  if(!saved.length){
+    const p=document.createElement('p'); p.className='empty'; p.textContent='Nothing saved yet.';
+    listEl.appendChild(p); return;
+  }
+  saved.forEach((s,i)=>{
+    const li=document.createElement('li');
+    const go=document.createElement('button'); go.className='go'; go.textContent=s.t;
+    go.addEventListener('click',()=>run(s.t));
+    const del=document.createElement('button'); del.className='del'; del.textContent='\u2715';
+    del.setAttribute('aria-label','Delete');
+    del.addEventListener('click',()=>{ saved.splice(i,1); persist(); render(); });
+    li.appendChild(go); li.appendChild(del); listEl.appendChild(li);
+  });
+}
+function run(text){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>toast('Copied. Opening the portal')).catch(()=>toast('Opening the portal'));
+  } else { toast('Opening the portal'); }
+  window.open(CORE,'_blank','noopener');
+}
+document.getElementById('add').addEventListener('click',()=>{
+  const v=qEl.value.trim();
+  if(!v){ toast('Type a name or case number first'); return; }
+  saved.unshift({t:v, at:Date.now()});
+  saved=saved.slice(0,50);
+  persist(); qEl.value=''; render();
+});
+qEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('add').click(); }});
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
+</script>
+</body>
+</html>
