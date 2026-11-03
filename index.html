@@ -171,5 +171,22 @@ document.getElementById('add').addEventListener('click',()=>{
 qEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('add').click(); }});
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
 </script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js', {updateViaCache: 'none'}).then(function(r) {
+    r.addEventListener('updatefound', function() {
+      var w = r.installing;
+      if (!w) return;
+      w.addEventListener('statechange', function() {
+        if (w.state === 'activated' && !sessionStorage.getItem('swre')) {
+          sessionStorage.setItem('swre', '1');
+          location.reload();
+        }
+      });
+    });
+  });
+}
+</script>
 </body>
 </html>
