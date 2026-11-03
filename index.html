@@ -14,63 +14,131 @@
 <link rel="icon" href="favicon.png">
 <style>
   :root{
-    --bg:#f2f2f7; --card:#ffffff; --text:#1c1c1e; --sub:#6e6e73;
-    --navy:#0b2545; --navy2:#13315c; --blue:#0a84ff; --sep:rgba(60,60,67,.12);
+    --bg:#f6f4ef; --card:#ffffff; --ink:#1c2433; --sub:#5d6572;
+    --navy:#0b2545; --navy2:#13315c; --gold:#b3893c; --gold-soft:rgba(179,137,60,.14);
+    --blue:#0a84ff; --sep:rgba(28,36,51,.10); --hair:rgba(179,137,60,.35);
   }
   @media (prefers-color-scheme: dark){
-    :root{ --bg:#000; --card:#1c1c1e; --text:#f2f2f7; --sub:#98989f; --sep:rgba(255,255,255,.12); }
+    :root{
+      --bg:#0d1117; --card:#161c26; --ink:#eceef2; --sub:#9aa3b0;
+      --navy:#12233d; --navy2:#1a3054; --gold:#c9a45a; --gold-soft:rgba(201,164,90,.12);
+      --sep:rgba(236,238,242,.12); --hair:rgba(201,164,90,.28);
+    }
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
   html,body{margin:0}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
-    background:var(--bg); color:var(--text); min-height:100dvh;
-    padding:calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 24px);
+    background:var(--bg); color:var(--ink); min-height:100dvh;
+    padding:calc(env(safe-area-inset-top) + 14px) 18px calc(env(safe-area-inset-bottom) + 28px);
   }
-  header{padding:6px 4px 18px}
-  h1{font-size:26px; font-weight:700; margin:0; letter-spacing:-.4px}
-  .sub{margin:4px 0 0; color:var(--sub); font-size:14px}
+  .wrap{max-width:640px; margin:0 auto}
+
+  header{padding:8px 2px 0; text-align:center}
+  .crest{
+    width:52px; height:52px; border-radius:50%;
+    background:linear-gradient(180deg,var(--navy2),var(--navy));
+    display:flex; align-items:center; justify-content:center; margin:0 auto 12px;
+    box-shadow:0 4px 14px rgba(11,37,69,.30), inset 0 0 0 1.5px var(--hair);
+  }
+  .eyebrow{
+    font-size:11px; letter-spacing:2.2px; text-transform:uppercase;
+    color:var(--gold); font-weight:600; margin:0;
+  }
+  h1{
+    font-family:Georgia,"Times New Roman",serif; font-size:27px; font-weight:600;
+    margin:6px 0 0; letter-spacing:.2px; color:var(--ink);
+  }
+  .sub{margin:6px 0 0; color:var(--sub); font-size:13.5px}
+  .rule{height:1px; background:linear-gradient(90deg,transparent,var(--hair) 18%,var(--hair) 82%,transparent); margin:18px 0 0}
+
+  .chips{
+    display:flex; gap:8px; overflow-x:auto; padding:16px 0 2px; margin:0 -2px;
+    scrollbar-width:none;
+  }
+  .chips::-webkit-scrollbar{display:none}
+  .chips a{
+    flex:0 0 auto; padding:7px 14px; border-radius:999px; text-decoration:none;
+    font-size:13px; font-weight:600; color:var(--ink);
+    background:var(--card); box-shadow:0 1px 2px rgba(0,0,0,.05), inset 0 0 0 1px var(--sep);
+  }
+  .chips a:active{transform:scale(.97)}
+
   .btn{
     display:flex; align-items:center; justify-content:center; gap:10px;
-    width:100%; padding:16px; border-radius:14px; border:0;
+    width:100%; padding:16px; border-radius:14px; border:0; margin-top:18px;
     background:linear-gradient(180deg,var(--navy2),var(--navy)); color:#fff;
     font-size:17px; font-weight:600; text-decoration:none;
-    box-shadow:0 6px 16px rgba(11,37,69,.28); cursor:pointer;
+    box-shadow:0 6px 16px rgba(11,37,69,.28), inset 0 0 0 1px rgba(255,255,255,.06); cursor:pointer;
   }
-  .btn:active{transform:scale(.98)}
-  .hint{color:var(--sub); font-size:13px; line-height:1.45; margin:10px 2px 0}
+  .btn:active{transform:scale(.985)}
+  .hint{color:var(--sub); font-size:13px; line-height:1.5; margin:10px 2px 0}
+
+  section{margin-top:30px}
+  .shead{display:flex; align-items:center; gap:10px; margin-bottom:12px}
+  .shead h2{
+    font-size:12.5px; font-weight:700; margin:0; text-transform:uppercase;
+    letter-spacing:1.6px; color:var(--gold); white-space:nowrap;
+  }
+  .shead::after{content:""; flex:1; height:1px; background:var(--sep)}
+
   .card{
     background:var(--card); border-radius:16px; padding:16px;
-    margin-top:22px; box-shadow:0 1px 3px rgba(0,0,0,.06);
+    box-shadow:0 1px 3px rgba(0,0,0,.05);
   }
-  h2{font-size:15px; font-weight:600; margin:0 0 12px; text-transform:uppercase; letter-spacing:.5px; color:var(--sub)}
   .row{display:flex; gap:10px}
   input[type=text]{
     flex:1; min-width:0; padding:12px 14px; font-size:16px; border-radius:12px;
-    border:1px solid var(--sep); background:var(--bg); color:var(--text); outline:none;
+    border:1px solid var(--sep); background:var(--bg); color:var(--ink); outline:none;
   }
-  input[type=text]:focus{border-color:var(--blue)}
+  input[type=text]:focus{border-color:var(--gold)}
   button.add{
     padding:12px 18px; font-size:16px; font-weight:600; border:0; border-radius:12px;
-    background:var(--blue); color:#fff; cursor:pointer;
+    background:var(--navy); color:#fff; cursor:pointer;
   }
   ul{list-style:none; margin:12px 0 0; padding:0}
   li{display:flex; align-items:center; gap:8px; padding:12px 2px; border-top:1px solid var(--sep)}
   li:first-child{border-top:0}
-  li .go{flex:1; text-align:left; font-size:16px; background:none; border:0; color:var(--text); padding:0; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  li .go{flex:1; text-align:left; font-size:16px; background:none; border:0; color:var(--ink); padding:0; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
   li .del{background:none; border:0; color:var(--sub); font-size:18px; padding:4px 8px; cursor:pointer}
   .empty{color:var(--sub); font-size:14px; margin-top:10px}
-  .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:22px}
+
+  .panel{background:var(--card); border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .panel a{
+    display:flex; align-items:center; gap:14px; padding:14px 16px;
+    border-top:1px solid var(--sep); text-decoration:none; color:var(--ink);
+  }
+  .panel a:first-child{border-top:0}
+  .panel a:active{background:var(--gold-soft)}
+  .panel .name{display:block; font-size:15.5px; font-weight:600; line-height:1.3}
+  .panel .desc{display:block; font-size:12.5px; color:var(--sub); margin-top:2px; line-height:1.4}
+  .panel .dot{
+    flex:0 0 auto; width:8px; height:8px; border-radius:50%;
+    background:var(--gold); opacity:.75; margin-right:2px;
+  }
+  .panel .chev{
+    flex:0 0 auto; margin-left:auto; color:var(--sub); font-size:20px; line-height:1;
+    font-family:Georgia,serif;
+  }
+
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
   .grid a{
-    display:flex; align-items:center; justify-content:center; padding:14px;
-    border-radius:14px; background:var(--card); color:var(--text); text-decoration:none;
-    font-size:15px; font-weight:500; box-shadow:0 1px 3px rgba(0,0,0,.06);
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    padding:13px 10px; border-radius:13px; background:var(--card); color:var(--ink);
+    text-decoration:none; font-size:14px; font-weight:500; line-height:1.3;
+    box-shadow:0 1px 3px rgba(0,0,0,.05);
   }
   .grid a:active{transform:scale(.98)}
-  .foot{margin-top:26px; color:var(--sub); font-size:12px; line-height:1.5; text-align:center}
+
+  .about p{color:var(--sub); font-size:13px; line-height:1.55; margin:0 0 10px}
+  .about p:last-child{margin:0}
+  .about a{color:var(--gold); text-decoration:none; word-break:break-all}
+
+  .foot{margin-top:30px; color:var(--sub); font-size:12px; line-height:1.5; text-align:center; padding:0 8px}
+
   #toast{
     position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom) + 28px);
-    transform:translateX(-50%) translateY(20px); background:rgba(28,28,30,.92); color:#fff;
+    transform:translateX(-50%) translateY(20px); background:rgba(28,36,51,.94); color:#fff;
     padding:10px 18px; border-radius:20px; font-size:14px; opacity:0; pointer-events:none;
     transition:opacity .2s, transform .2s; max-width:80vw; text-align:center; z-index:9;
   }
@@ -78,16 +146,46 @@
 </style>
 </head>
 <body>
+<div class="wrap">
+
 <header>
+  <div class="crest" aria-hidden="true">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c9a45a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3v18"/><path d="M12 5h7"/><path d="M12 5H5"/>
+      <path d="M5 5l-2.5 6a2.9 2.9 0 0 0 5 0Z"/><path d="M19 5l-2.5 6a2.9 2.9 0 0 0 5 0Z"/>
+      <path d="M8 21h8"/>
+    </svg>
+  </div>
+  <p class="eyebrow">Duval County &middot; Florida</p>
   <h1>Duval Court Records</h1>
-  <p class="sub">Duval County Clerk of Courts &middot; CORE portal</p>
+  <p class="sub">Clerk of Courts portal access, statutes, forms &amp; research</p>
+  <div class="rule"></div>
 </header>
 
-<a class="btn" id="openCore" href="https://core.duvalclerk.com/CoreCms.aspx?mode=PublicAccess" target="_blank" rel="noopener">Open the CORE portal</a>
-<p class="hint">Opens the official portal in Safari. Sign in there with your own account.</p>
+<nav class="chips" aria-label="Sections">
+  <a href="#portal">Portal</a>
+  <a href="#tools">Case tools</a>
+  <a href="#law">Law &amp; research</a>
+  <a href="#forms">Forms</a>
+  <a href="#courts">Courts</a>
+  <a href="#access">Accessibility</a>
+  <a href="#about">Notices</a>
+</nav>
 
-<section class="card">
-  <h2>Saved searches</h2>
+<section id="portal">
+  <div class="shead"><h2>Portal</h2></div>
+  <a class="btn" id="openCore" href="https://core.duvalclerk.com/CoreCms.aspx?mode=PublicAccess" target="_blank" rel="noopener">Open the CORE portal</a>
+  <p class="hint">Opens the official portal in Safari. Sign in there with your own account.</p>
+  <div class="grid" style="margin-top:12px">
+    <a href="https://core.duvalclerk.com/CoreCms.aspx" target="_blank" rel="noopener">CORE login</a>
+    <a href="https://core.duvalclerk.com/CreateAccount.aspx" target="_blank" rel="noopener">Create account</a>
+    <a href="https://core.duvalclerk.com/" target="_blank" rel="noopener">CORE home</a>
+    <a href="https://www.duvalclerk.com/" target="_blank" rel="noopener">Clerk website</a>
+  </div>
+</section>
+
+<section id="tools" class="card">
+  <div class="shead"><h2>Case tools</h2></div>
   <div class="row">
     <input id="q" type="text" placeholder="Name or case number" autocomplete="off" autocapitalize="off" spellcheck="false">
     <button class="add" id="add">Save</button>
@@ -96,61 +194,143 @@
   <p class="hint">Tap a saved search to copy it and jump to the portal, then paste it into the search box.</p>
 </section>
 
-<section class="grid">
-  <a href="https://core.duvalclerk.com/CoreCms.aspx" target="_blank" rel="noopener">CORE login</a>
-  <a href="https://core.duvalclerk.com/CreateAccount.aspx" target="_blank" rel="noopener">Create account</a>
-  <a href="https://core.duvalclerk.com/" target="_blank" rel="noopener">CORE home</a>
-  <a href="https://www.duvalclerk.com/" target="_blank" rel="noopener">Clerk website</a>
+<section id="law">
+  <div class="shead"><h2>Law &amp; research</h2></div>
+  <div class="panel">
+    <a href="reader.html">
+      <span class="dot"></span>
+      <span><span class="name">Statute reader</span><span class="desc">Read US Code and Florida Statutes in-app, official styling</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a href="https://uscode.house.gov/" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">U.S. Code</span><span class="desc">Official current edition, Office of the Law Revision Counsel</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a href="https://www.ecfr.gov/" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">Code of Federal Regulations</span><span class="desc">eCFR, the daily updated official version</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a href="https://www.leg.state.fl.us/statutes/" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">Florida Statutes</span><span class="desc">Official site of the Florida Legislature</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a href="https://www.flrules.org/" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">Florida Administrative Code</span><span class="desc">State agency rules</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a href="https://www.courtlistener.com/" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">CourtListener</span><span class="desc">Free opinions and dockets, federal and state</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a href="https://www.jud4.org/duval-county-law-library" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">Duval County Law Library</span><span class="desc">4th Judicial Circuit legal research library</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+  </div>
 </section>
 
-
-<h2 style="margin-top:26px">Accessibility resources</h2>
-<div class="grid">
-    <a href="https://www.ada.gov/" target="_blank" rel="noopener">ADA.gov</a>
-    <a href="https://www.access-board.gov/ict.html" target="_blank" rel="noopener">Access Board 508</a>
-    <a href="https://www.usdoj.gov/crt/508/508home.php" target="_blank" rel="noopener">DOJ Section 508</a>
-    <a href="https://www.section508.gov/" target="_blank" rel="noopener">Section508.gov</a>
-    <a href="https://www.flcourts.gov/Services/information-technology/oit-resources/Court-Access" target="_blank" rel="noopener">FL Courts OIT</a>
-    <a href="http://web.archive.org/web/20211217071151/https://www.floridabar.org/about/diversity/efile001/" target="_blank" rel="noopener">FL Bar accessibility (archive)</a>
+<section id="forms">
+  <div class="shead"><h2>Forms &amp; self-help</h2></div>
+  <div class="panel">
+    <a href="https://www.duvalclerk.com/getmedia/c0682bbc-5153-49bf-b435-e0ca791255ca/SmallClaimsPacket_20200101_ADA_Compliant.pdf" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">Small claims packet</span><span class="desc">The Clerk's ADA-compliant filing packet, PDF</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a href="https://www.jud4.org/court-programs/small-claims-clinics" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">Small claims clinics</span><span class="desc">Free clinics through the 4th Judicial Circuit</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
   </div>
+</section>
 
-<h2 style="margin-top:26px">Statutes &amp; laws</h2>
-<div class="grid">
-    <a href="reader.html">Statute reader</a>
-    <a href="https://uscode.house.gov/" target="_blank" rel="noopener">U.S. Code</a>
-    <a href="https://www.ecfr.gov/" target="_blank" rel="noopener">Code of Federal Regulations</a>
-    <a href="https://www.flrules.org/" target="_blank" rel="noopener">Florida Administrative Code</a>
+<section id="courts">
+  <div class="shead"><h2>Courts &amp; resources</h2></div>
+  <div class="panel">
+    <a href="https://www.flcourts.gov/" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">Florida Courts</span><span class="desc">State court system, opinions and rules</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a href="https://www.myflcourtaccess.com/" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">FL case search</span><span class="desc">Statewide court records access</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a href="https://www.jud4.org/" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">4th Judicial Circuit</span><span class="desc">Duval, Clay and Nassau counties</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a href="https://www2.miamidadeclerk.gov/QOS/" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">Miami-Dade search</span><span class="desc">Quick case search</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a href="https://www.miamidadeclerk.gov/" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">Miami-Dade clerk</span><span class="desc">Clerk of Courts website</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a href="https://www.floridabar.org/" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">Florida Bar</span><span class="desc">Attorney search, rules and practice resources</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
   </div>
+</section>
 
-<h2 style="margin-top:26px">Forms &amp; self-help</h2>
-<div class="grid">
-    <a href="https://www.duvalclerk.com/getmedia/c0682bbc-5153-49bf-b435-e0ca791255ca/SmallClaimsPacket_20200101_ADA_Compliant.pdf" target="_blank" rel="noopener">Small claims packet</a>
-    <a href="https://www.jud4.org/court-programs/small-claims-clinics" target="_blank" rel="noopener">Small claims clinics</a>
-    <a href="https://www.jud4.org/duval-county-law-library" target="_blank" rel="noopener">Duval law library</a>
+<section id="access">
+  <div class="shead"><h2>Accessibility resources</h2></div>
+  <div class="panel">
+    <a href="https://www.ada.gov/" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">ADA.gov</span><span class="desc">US Department of Justice ADA homepage</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a href="https://www.access-board.gov/ict.html" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">Access Board Section 508</span><span class="desc">Electronic and information technology standards</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a href="https://www.section508.gov/" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">Section508.gov</span><span class="desc">Federal accessibility guidance</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a href="https://www.flcourts.gov/Services/information-technology/oit-resources/Court-Access" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">FL Courts court access</span><span class="desc">OIT resources for accessible court records</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a href="http://web.archive.org/web/20211217071151/https://www.floridabar.org/about/diversity/efile001/" target="_blank" rel="noopener">
+      <span class="dot"></span>
+      <span><span class="name">FL Bar accessibility (archive)</span><span class="desc">Archived Bar page on accessible e-filing</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
   </div>
+</section>
 
-<section class="card" id="fo:about">
-  <h2>About &amp; notices</h2>
-  <p class="hint">Documents filed with the court are PDF/A and may contain hyperlinks the Clerk does not vet. Treat links in any document with the same caution as links on any website.</p>
-  <p class="hint">Viewing permissions follow the Florida Supreme Court's administrative orders and Security Matrix, based on your role, the case type, and the document. Rules: <a href="https://www.duvalclerk.com/online-option/court-records" target="_blank" rel="noopener">duvalclerk.com/online-option/court-records</a></p>
-  <p class="hint">The Clerk works to keep portal information accurate but makes no warranties as to completeness, accuracy, or timeliness. This app is an unofficial launcher for the official portal.</p>
+<section id="about" class="card about">
+  <div class="shead"><h2>About &amp; notices</h2></div>
+  <p>Documents accepted into court files are PDF/A as required by the Florida Supreme Court and may include embedded hyperlinks. Treat links in any filed document with the same caution as links on any website.</p>
+  <p>Viewing permissions follow the Florida Supreme Court's administrative orders and Security Matrix, based on your role, the case type, and the document. Rules: <a href="https://www.duvalclerk.com/online-option/court-records" target="_blank" rel="noopener">duvalclerk.com/online-option/court-records</a></p>
+  <p>The Clerk works to keep portal information accurate but makes no warranties as to completeness, accuracy, or timeliness. This app is an unofficial launcher for the official portal.</p>
 </section>
 
 <p class="foot">Unofficial launcher for the official Duval County Clerk CORE portal. Your searches stay on this device.</p>
 
 <div id="toast"></div>
 
-<h2 style="margin-top:26px">Florida courts &amp; law</h2>
-<div class="grid">
-    <a href="https://www.flcourts.gov/" target="_blank" rel="noopener">FL courts</a>
-    <a href="https://www.myflcourtaccess.com/" target="_blank" rel="noopener">FL case search</a>
-    <a href="https://www2.miamidadeclerk.gov/QOS/" target="_blank" rel="noopener">Miami-Dade search</a>
-    <a href="https://www.miamidadeclerk.gov/" target="_blank" rel="noopener">Miami-Dade clerk</a>
-    <a href="https://www.leg.state.fl.us/statutes/" target="_blank" rel="noopener">FL statutes</a>
-    <a href="https://www.floridabar.org/" target="_blank" rel="noopener">Florida Bar</a>
-    <a href="https://www.jud4.org/" target="_blank" rel="noopener">4th Judicial Circuit</a>
-    <a href="https://www.courtlistener.com/" target="_blank" rel="noopener">CourtListener</a>
-  </div>
+</div>
+
 <script>
 const CORE='https://core.duvalclerk.com/CoreCms.aspx?mode=PublicAccess';
 const KEY='duval-searches';
