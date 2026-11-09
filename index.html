@@ -21,7 +21,7 @@
   --accent:#b4172c; --accent-h:#8e1022; --accent-soft:#fbecee; --accent-ink:#fff; --link:#0f559c; --mark:#fff0a8;
   --ok:#17663a; --warn:#8a4500; --focus:#b4172c; --docbg:#fff; --shadow:0 1px 2px rgba(0,0,0,.05),0 1px 6px rgba(0,0,0,.04);
   --serif:Georgia,"Times New Roman",Times,serif; --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; --toph:112px; --railw:232px; --botnav:60px;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; --toph:112px; --railw:232px;
   color-scheme:light;
 }
 :root[data-theme=dark]{
@@ -31,8 +31,7 @@
 }
 *{box-sizing:border-box}
 html{scroll-padding-top:calc(var(--toph) + 12px);-webkit-text-size-adjust:100%}
-body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:16px;line-height:1.45;padding-bottom:calc(var(--botnav) + env(safe-area-inset-bottom))}
-@media(min-width:960px){body{padding-bottom:0}}
+body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:16px;line-height:1.45}
 a{color:var(--link)}
 button{font:inherit;color:inherit}
 [hidden]{display:none!important}
@@ -91,20 +90,17 @@ svg.i{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-
 .rail a .n{margin-left:auto;font-size:.75rem;font-weight:600;color:var(--mute)}
 .rail .railnote{margin:1.2rem .75rem 0;font-size:.76rem;color:var(--mute);line-height:1.45}
 .rail .sheet-h{display:none}
-/* mobile: rail becomes a bottom sheet */
+/* mobile: rail becomes a top slide-down menu opened from the header's menu button */
+.menubtn{display:inline-grid}
+@media(min-width:960px){.menubtn{display:none}}
+@keyframes menudown{from{transform:translateY(-100%)}to{transform:none}}
 @media(max-width:959.98px){
-  .rail.open{display:block;position:fixed;left:0;right:0;bottom:0;z-index:70;max-height:82vh;overflow:auto;background:var(--surface);border-radius:1rem 1rem 0 0;padding:.6rem .8rem calc(env(safe-area-inset-bottom) + 1rem);box-shadow:0 -8px 30px rgba(0,0,0,.25)}
+  .rail.open{display:block;position:fixed;left:0;right:0;top:0;z-index:70;max-height:88vh;overflow:auto;overscroll-behavior:contain;background:var(--surface);border-top:3px solid var(--accent);border-radius:0 0 1rem 1rem;padding:calc(env(safe-area-inset-top) + .45rem) .8rem 1rem;box-shadow:0 8px 30px rgba(0,0,0,.25);animation:menudown .2s ease-out}
   .rail.open .sheet-h{display:flex;align-items:center;justify-content:space-between;padding:.2rem .3rem .4rem}
   .rail.open .sheet-h b{font-family:var(--serif);font-size:1.1rem}
   .rail.open a[aria-current=page]::before{display:none}
 }
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:65}
-.botnav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom)}
-@media(min-width:960px){.botnav{display:none}}
-.botnav a,.botnav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;min-height:var(--botnav);border:0;background:none;color:var(--sub);text-decoration:none;font-size:.7rem;font-weight:600;cursor:pointer;position:relative}
-.botnav [aria-current=page]{color:var(--accent)}
-.botnav [aria-current=page]::after{content:"";position:absolute;top:0;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:var(--accent)}
-
 /* ---------- views ---------- */
 main{min-width:0;padding:.85rem .9rem 2rem}
 @media(min-width:960px){main{padding:1.1rem 1.6rem 2.5rem}}
@@ -268,12 +264,12 @@ footer{max-width:1600px;margin:0 auto;padding:1.2rem 1rem 2rem;color:var(--sub);
 @media(min-width:960px){footer{padding-left:calc(var(--railw) + 1.6rem)}}
 footer p{margin:.35rem 0;max-width:110ch}
 footer strong{color:var(--ink)}
-.toast{position:fixed;left:50%;bottom:calc(var(--botnav) + env(safe-area-inset-bottom) + 1rem);transform:translate(-50%,1rem);background:#1e1e1e;color:#fff;padding:.6rem 1rem;border-radius:.45rem;font-weight:600;font-size:.9rem;opacity:0;transition:.2s;pointer-events:none;z-index:95;max-width:90vw;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 1rem);transform:translate(-50%,1rem);background:#1e1e1e;color:#fff;padding:.6rem 1rem;border-radius:.45rem;font-weight:600;font-size:.9rem;opacity:0;transition:.2s;pointer-events:none;z-index:95;max-width:90vw;box-shadow:0 4px 16px rgba(0,0,0,.25)}
 :root[data-theme=dark] .toast{background:#ebecee;color:#111}
 @media(min-width:960px){.toast{bottom:1.5rem}}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
-@media print{.top,.rail,.botnav,.toast,.acts,.facets,.crumbs,.scrim{display:none!important}body{background:#fff;padding:0}.shell{display:block}.doc,.panel{box-shadow:none}}
+@media print{.top,.rail,.toast,.acts,.facets,.crumbs,.scrim{display:none!important}body{background:#fff;padding:0}.shell{display:block}.doc,.panel{box-shadow:none}}
 
 .saved .go span.tag{display:inline-block;vertical-align:1px}
 .grouped .badge{display:none}
@@ -300,6 +296,7 @@ footer strong{color:var(--ink)}
    <button class="gs-go" type="submit" id="ggo" aria-label="Search"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></button>
   </form>
   <div class="top-acts">
+   <button class="ibtn menubtn" id="menubtn" type="button" aria-label="Menu" title="Menu" aria-controls="rail" aria-expanded="false"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg></button>
    <button class="ibtn" id="theme" type="button" aria-label="Toggle dark mode" title="Dark mode"><svg class="i" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
  </div>
@@ -513,13 +510,6 @@ footer strong{color:var(--ink)}
  </main>
 </div>
 
-<nav class="botnav" id="botnav" aria-label="Main (mobile)">
- <a href="#/" data-nav="search"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><span>Search</span></a>
- <a href="#/cases" data-nav="cases"><svg class="i" aria-hidden="true"><use href="#i-cases"/></svg><span>Cases</span></a>
- <a href="#/deadlines" data-nav="deadlines"><svg class="i" aria-hidden="true"><use href="#i-deadlines"/></svg><span>Deadlines</span></a>
- <a href="#/saved" data-nav="saved"><svg class="i" aria-hidden="true"><use href="#i-saved"/></svg><span>Saved</span></a>
- <button type="button" id="morebtn" aria-controls="rail" aria-expanded="false"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg><span>More</span></button>
-</nav>
 <div class="scrim" id="scrim" hidden></div>
 
 <footer>
@@ -840,9 +830,9 @@ function counts(){const set=(id,v)=>{const e=$(id);if(e)e.textContent=v;};set('n
 
 /* ---------- sheets (mobile menu & filters) ---------- */
 const scrim=$('scrim');
-function openSheet(id){closeSheets();$(id).classList.add('open');scrim.hidden=false;if(id==='rail')$('morebtn').setAttribute('aria-expanded','true');const f=$(id).querySelector('button,a');if(f)f.focus();}
-function closeSheets(){document.querySelectorAll('.open').forEach(e=>e.classList.remove('open'));scrim.hidden=true;$('morebtn').setAttribute('aria-expanded','false');}
-$('morebtn').addEventListener('click',()=>$('rail').classList.contains('open')?closeSheets():openSheet('rail'));
+function openSheet(id){closeSheets();$(id).classList.add('open');scrim.hidden=false;if(id==='rail')$('menubtn').setAttribute('aria-expanded','true');const f=$(id).querySelector('button,a');if(f)f.focus();}
+function closeSheets(){document.querySelectorAll('.open').forEach(e=>e.classList.remove('open'));scrim.hidden=true;$('menubtn').setAttribute('aria-expanded','false');}
+$('menubtn').addEventListener('click',()=>$('rail').classList.contains('open')?closeSheets():openSheet('rail'));
 $('railclose').addEventListener('click',closeSheets);
 scrim.addEventListener('click',closeSheets);
 $('fopen').addEventListener('click',()=>openSheet('facets'));
