@@ -1,4 +1,4 @@
-const CACHE = 'duval-shell-v18';
+const CACHE = 'duval-shell-v19';
 const ASSETS = ['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png','./favicon.png','./reader.html','./usc-pane.css','./catalog.html'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

@@ -3,251 +3,524 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Duval Court Records · Practitioner's Desk</title>
-<meta name="description" content="Desk tool for Duval County (4th Judicial Circuit) practitioners: CORE portal launcher, Florida deadline calculator (Rule 2.514 + court holidays), case number decoder, saved searches, verified directory.">
+<title>Duval Court Records · Research desk</title>
+<meta name="description" content="Legal research desk for Duval County (4th Judicial Circuit) practitioners: universal search across CORE, a Florida deadline calculator (Rule 2.514 + court holidays), case number decoder, saved folders, research history and a verified court directory.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Duval Courts">
-<meta name="theme-color" content="#0b2545">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#191c20" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="favicon.png">
 <script>try{var t=localStorage.getItem('duval-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
 <style>
 :root{
-  --bg:#f4f5f7; --card:#fff; --ink:#14213d; --sub:#4a5468; --line:#d9dde5; --navy:#0b2545; --navy2:#13315c;
-  --accent:#1d4e89; --gold:#7a5a16; --soft:#eef2f8; --ok:#14653a; --warn:#8a4b00; --focus:#b07d1e; --shadow:0 1px 2px rgba(20,33,61,.06),0 2px 8px rgba(20,33,61,.05);
+  --bg:#f3f3f3; --surface:#fff; --surface2:#f8f8f8; --ink:#1e1e1e; --sub:#595959; --mute:#6b6b6b; --line:#dcdcdc; --line2:#ebebeb;
+  --accent:#b4172c; --accent-h:#8e1022; --accent-soft:#fbecee; --accent-ink:#fff; --link:#0f559c; --mark:#fff0a8;
+  --ok:#17663a; --warn:#8a4500; --focus:#b4172c; --docbg:#fff; --shadow:0 1px 2px rgba(0,0,0,.05),0 1px 6px rgba(0,0,0,.04);
   --serif:Georgia,"Times New Roman",Times,serif; --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; --toph:112px; --railw:232px; --botnav:60px;
+  color-scheme:light;
 }
 :root[data-theme=dark]{
-  --bg:#0e131b; --card:#161d29; --ink:#e8ecf3; --sub:#a9b3c4; --line:#2a3445; --navy:#0b1830; --navy2:#13284a;
-  --accent:#8fb6ea; --gold:#d6b46a; --soft:#1c2636; --ok:#6fd39b; --warn:#f0b35a; --focus:#d6b46a; --shadow:none;
+  --bg:#101214; --surface:#191c20; --surface2:#15181b; --ink:#ebecee; --sub:#adb1b8; --mute:#9aa0a8; --line:#2d3137; --line2:#24282d;
+  --accent:#ef5468; --accent-h:#ff7385; --accent-soft:#3a1c22; --accent-ink:#1a0408; --link:#8dbdf3; --mark:#5c4b00;
+  --ok:#70d59d; --warn:#f2b45c; --focus:#ef5468; --docbg:#1c1f24; --shadow:none; color-scheme:dark;
 }
 *{box-sizing:border-box}
-html{scroll-padding-top:7.5rem}
-body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
-a{color:var(--accent)}
-.skip{position:absolute;left:-9999px;top:0;background:var(--gold);color:#000;padding:.6rem 1rem;z-index:50;font-weight:700}
+html{scroll-padding-top:calc(var(--toph) + 12px);-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:16px;line-height:1.45;padding-bottom:calc(var(--botnav) + env(safe-area-inset-bottom))}
+@media(min-width:960px){body{padding-bottom:0}}
+a{color:var(--link)}
+button{font:inherit;color:inherit}
+[hidden]{display:none!important}
+.hidden{display:none!important}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:-9999px;top:0;background:var(--accent);color:#fff;padding:.6rem 1rem;z-index:90;font-weight:700}
 .skip:focus{left:0}
-:is(a,button,input,select,textarea,summary):focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
-/* top bar */
-.top{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;padding:calc(env(safe-area-inset-top) + .5rem) 1rem .5rem;box-shadow:0 2px 10px rgba(0,0,0,.18)}
-.top-in{max-width:1320px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .9rem}
-.brand{display:flex;align-items:center;gap:.6rem;color:#fff;text-decoration:none;min-width:0}
-.crest{width:2.1rem;height:2.1rem;border-radius:50%;border:1.5px solid #c9a45a;display:grid;place-items:center;flex:0 0 auto}
-.brand b{font-family:var(--serif);font-weight:600;font-size:1.15rem;letter-spacing:.01em;white-space:nowrap}
-.brand small{display:block;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:#d9c08a;font-weight:600}
-.search{flex:1 1 320px;order:3;display:flex;position:relative}
-@media(min-width:760px){.search{order:0}}
-.search input{width:100%;font-size:1rem;padding:.6rem 2.4rem .6rem 2.3rem;border-radius:.55rem;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;min-height:2.6rem}
-.search input::placeholder{color:#c8d1e0}
-.search input:focus{background:#fff;color:#14213d;outline:3px solid #d6b46a;outline-offset:1px}
-.search input:focus::placeholder{color:#5b6475}
-.search svg{position:absolute;left:.7rem;top:50%;transform:translateY(-50%);pointer-events:none;opacity:.8}
-.search kbd{position:absolute;right:.6rem;top:50%;transform:translateY(-50%);font:600 .72rem var(--sans);border:1px solid rgba(255,255,255,.35);border-radius:4px;padding:.05rem .35rem;color:#dfe5ef}
-.search input:focus ~ kbd{display:none}
-.tbtn{background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:.5rem;min-height:2.6rem;min-width:2.6rem;padding:0 .7rem;font-size:.9rem;cursor:pointer}
-.nav{width:100%;order:4;display:flex;gap:.25rem;overflow-x:auto;scrollbar-width:none;margin:0 -.25rem}
-.nav::-webkit-scrollbar{display:none}
-.nav a{color:#dfe6f2;text-decoration:none;font-size:.84rem;font-weight:600;padding:.4rem .6rem;border-radius:.4rem;white-space:nowrap}
-.nav a:hover{background:rgba(255,255,255,.1);color:#fff}
-.status{max-width:1320px;margin:.35rem auto 0;font-size:.82rem;color:#d9c08a}.status:empty{display:none}
-/* layout */
-main{max-width:1320px;margin:0 auto;padding:1rem 1rem 2rem}
-.hero{background:var(--card);border:1px solid var(--line);border-radius:.8rem;padding:1rem 1.1rem;box-shadow:var(--shadow);display:grid;gap:.8rem}
-.hero h1{font-family:var(--serif);font-weight:600;font-size:1.45rem;margin:0;line-height:1.2}
-.hero p{margin:0;color:var(--sub);font-size:.92rem}
+:is(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
+mark{background:var(--mark);color:inherit;border-radius:2px;padding:0 1px}
+svg.i{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- top bar ---------- */
+.top{position:sticky;top:0;z-index:40;background:var(--surface);border-top:3px solid var(--accent);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top) + .45rem) .9rem .6rem}
+.top-in{display:grid;grid-template-columns:1fr auto;grid-template-areas:"brand acts" "search search";gap:.5rem .75rem;align-items:center;max-width:1600px;margin:0 auto}
+@media(min-width:760px){.top{padding-bottom:.55rem}.top-in{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"brand search acts";gap:1.25rem}}
+.brand{grid-area:brand;display:flex;align-items:center;gap:.6rem;text-decoration:none;color:var(--ink);min-width:0}
+.mono-mark{width:2.1rem;height:2.1rem;border-radius:.45rem;background:var(--accent);color:#fff;display:grid;place-items:center;flex:0 0 auto}
+:root[data-theme=dark] .mono-mark{color:#1a0408}
+.mono-mark svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.brand b{display:block;font-family:var(--serif);font-weight:700;font-size:1.08rem;letter-spacing:.005em;white-space:nowrap;line-height:1.15}
+.brand small{display:block;font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--sub);font-weight:700;white-space:nowrap}
+@media(min-width:960px){.brand{width:calc(var(--railw) - 1.6rem)}.shell{background:linear-gradient(to right,var(--surface) calc(var(--railw) - 1px),var(--line) calc(var(--railw) - 1px),var(--line) var(--railw),transparent var(--railw))}}
+.gsearch{grid-area:search;position:relative;display:flex;align-items:stretch;max-width:880px;width:100%}
+.gsearch .gs-scope{display:none;align-items:center;gap:.3rem;padding:0 .8rem;border:1px solid var(--line);border-right:0;border-radius:.45rem 0 0 .45rem;background:var(--surface2);color:var(--sub);font-size:.82rem;font-weight:600;white-space:nowrap}
+@media(min-width:760px){.gsearch .gs-scope{display:flex}.gsearch input{border-radius:0!important}}
+.gsearch input{flex:1;min-width:0;font:inherit;font-size:1rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-right:0;border-radius:.45rem 0 0 .45rem;padding:.62rem 2.2rem .62rem .85rem;min-height:2.85rem;-webkit-appearance:none;appearance:none}
+.gsearch input::placeholder{color:var(--mute)}
+.gsearch input:focus{outline:none;border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.gsearch input::-webkit-search-cancel-button{display:none}
+.gsearch .gs-clear{position:absolute;right:3.3rem;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--mute);width:2rem;height:2rem;border-radius:50%;cursor:pointer;font-size:1.1rem;line-height:1}
+.gsearch .gs-go{flex:0 0 auto;width:3.1rem;border:0;border-radius:0 .45rem .45rem 0;background:var(--accent);color:#fff;display:grid;place-items:center;cursor:pointer}
+:root[data-theme=dark] .gsearch .gs-go{color:#1a0408}
+.gsearch .gs-go:hover{background:var(--accent-h)}
+.gsearch kbd{position:absolute;right:3.6rem;top:50%;transform:translateY(-50%);font:600 .72rem var(--sans);border:1px solid var(--line);border-radius:4px;padding:.05rem .35rem;color:var(--mute);pointer-events:none}
+.gsearch input:focus ~ kbd,.gsearch.has-q kbd{display:none}
+.gsearch:not(.has-q) .gs-clear{display:none}
+@media(pointer:coarse),(max-width:759.98px){.gsearch kbd{display:none}}
+.top-acts{grid-area:acts;display:flex;gap:.35rem;align-items:center}
+.ibtn{display:inline-grid;place-items:center;min-width:2.75rem;min-height:2.75rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:.45rem;cursor:pointer}
+.ibtn:hover{border-color:var(--sub)}
+
+/* ---------- shell ---------- */
+.shell{max-width:1600px;margin:0 auto;display:block}
+@media(min-width:960px){.shell{display:grid;grid-template-columns:var(--railw) minmax(0,1fr)}}
+.rail{display:none}
+@media(min-width:960px){
+  .rail{display:block;position:sticky;top:var(--toph);align-self:start;height:calc(100vh - var(--toph));overflow:auto;border-right:1px solid var(--line);background:var(--surface);padding:.9rem .6rem 1.5rem}
+}
+.rail h2{font:700 .68rem var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:.9rem .7rem .4rem}
+.rail h2:first-child{margin-top:.2rem}
+.rail ul{list-style:none;margin:0;padding:0}
+.rail a{position:relative;display:flex;align-items:center;gap:.75rem;padding:.62rem .75rem;border-radius:.4rem;color:var(--ink);text-decoration:none;font-weight:600;font-size:.93rem;min-height:2.75rem}
+.rail a:hover{background:var(--surface2)}
+.rail a[aria-current=page]{background:var(--accent-soft);color:var(--accent)}
+.rail a[aria-current=page]::before{content:"";position:absolute;left:-.6rem;top:.45rem;bottom:.45rem;width:3px;border-radius:0 3px 3px 0;background:var(--accent)}
+.rail a .n{margin-left:auto;font-size:.75rem;font-weight:600;color:var(--mute)}
+.rail .railnote{margin:1.2rem .75rem 0;font-size:.76rem;color:var(--mute);line-height:1.45}
+.rail .sheet-h{display:none}
+/* mobile: rail becomes a bottom sheet */
+@media(max-width:959.98px){
+  .rail.open{display:block;position:fixed;left:0;right:0;bottom:0;z-index:70;max-height:82vh;overflow:auto;background:var(--surface);border-radius:1rem 1rem 0 0;padding:.6rem .8rem calc(env(safe-area-inset-bottom) + 1rem);box-shadow:0 -8px 30px rgba(0,0,0,.25)}
+  .rail.open .sheet-h{display:flex;align-items:center;justify-content:space-between;padding:.2rem .3rem .4rem}
+  .rail.open .sheet-h b{font-family:var(--serif);font-size:1.1rem}
+  .rail.open a[aria-current=page]::before{display:none}
+}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:65}
+.botnav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom)}
+@media(min-width:960px){.botnav{display:none}}
+.botnav a,.botnav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;min-height:var(--botnav);border:0;background:none;color:var(--sub);text-decoration:none;font-size:.7rem;font-weight:600;cursor:pointer;position:relative}
+.botnav [aria-current=page]{color:var(--accent)}
+.botnav [aria-current=page]::after{content:"";position:absolute;top:0;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:var(--accent)}
+
+/* ---------- views ---------- */
+main{min-width:0;padding:.85rem .9rem 2rem}
+@media(min-width:960px){main{padding:1.1rem 1.6rem 2.5rem}}
+.crumbs ol{list-style:none;margin:0 0 .55rem;padding:0;display:flex;flex-wrap:wrap;gap:.15rem .4rem;font-size:.8rem;color:var(--mute)}
+.crumbs li+li::before{content:"›";margin-right:.4rem;color:var(--mute)}
+.crumbs a{color:var(--sub);text-decoration:none}
+.crumbs a:hover{text-decoration:underline}
+.vh{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:.5rem 1rem;margin:0 0 1rem;padding-bottom:.75rem;border-bottom:1px solid var(--line)}
+.vh h1{font-family:var(--serif);font-weight:700;font-size:1.5rem;line-height:1.2;margin:0;letter-spacing:-.005em}
+@media(min-width:760px){.vh h1{font-size:1.75rem}}
+.vh p{margin:.25rem 0 0;color:var(--sub);font-size:.9rem;max-width:62ch}
+.eyebrow{font:700 .68rem var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 .3rem}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:.5rem;box-shadow:var(--shadow);min-width:0}
+.panel>.ph{display:flex;align-items:center;gap:.6rem;padding:.8rem 1rem;border-bottom:1px solid var(--line2)}
+.panel>.ph h2{font-family:var(--serif);font-size:1.12rem;font-weight:700;margin:0}
+.panel>.ph .more{margin-left:auto;font-size:.82rem;font-weight:600;text-decoration:none}
+.panel>.pb{padding:.9rem 1rem 1rem}
+.cols{display:grid;gap:1rem}
+@media(min-width:1100px){.cols.two{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start}}
+.stack{display:grid;gap:1rem;min-width:0}
+
+/* buttons & forms */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:2.75rem;padding:.5rem .95rem;border-radius:.4rem;font-weight:600;font-size:.92rem;text-decoration:none;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn:hover{border-color:var(--sub)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme=dark] .btn.pri{color:#1a0408}
+.btn.pri:hover{background:var(--accent-h);border-color:var(--accent-h)}
+.btn.sm{min-height:2.5rem;padding:.35rem .75rem;font-size:.86rem}
+.btn.link{border-color:transparent;background:none;color:var(--link);padding-left:.4rem;padding-right:.4rem}
 .acts{display:flex;flex-wrap:wrap;gap:.5rem}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:2.75rem;padding:.55rem 1rem;border-radius:.55rem;font-weight:600;font-size:.95rem;text-decoration:none;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink)}
-.btn.pri{background:var(--navy);border-color:var(--navy);color:#fff}
-:root[data-theme=dark] .btn.pri{background:#2a5ea8;border-color:#2a5ea8}
-.btn.sm{min-height:2.4rem;padding:.35rem .75rem;font-size:.88rem}
-.btn:hover{filter:brightness(1.05)}
-.grid{display:grid;gap:1rem;margin-top:1rem}
-@media(min-width:1024px){.grid.tools{grid-template-columns:1.25fr 1fr;align-items:start}.grid.tools .wide{grid-column:1/-1}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:.8rem;padding:1rem 1.1rem;box-shadow:var(--shadow);min-width:0}
-.card h2,.dir h2{font-family:var(--serif);font-weight:600;font-size:1.2rem;margin:0 0 .2rem;color:var(--ink);display:flex;align-items:center;gap:.5rem}
-.card .lead{margin:0 0 .8rem;color:var(--sub);font-size:.9rem}
-.h-ic{color:var(--gold);font-family:var(--serif);font-size:1.05rem;width:1.2rem;text-align:center}
-label{display:block;font-size:.82rem;font-weight:700;color:var(--sub);margin:0 0 .25rem;letter-spacing:.01em}
-input[type=text],input[type=date],input[type=number],select,textarea{width:100%;font:inherit;font-size:1rem;padding:.55rem .7rem;border-radius:.5rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-height:2.75rem}
-textarea{min-height:4rem;resize:vertical}
-.f{display:grid;gap:.75rem;grid-template-columns:1fr 1fr}
+label,.lbl{display:block;font-size:.8rem;font-weight:700;color:var(--sub);margin:0 0 .28rem}
+input[type=text],input[type=date],input[type=number],input[type=search].fi,select,textarea{width:100%;font:inherit;font-size:1rem;padding:.55rem .7rem;border-radius:.4rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);min-height:2.75rem}
+:is(input,select,textarea):focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.f{display:grid;gap:.8rem;grid-template-columns:1fr 1fr}
 .f .full{grid-column:1/-1}
 @media(max-width:520px){.f{grid-template-columns:1fr}}
-.chk{display:flex;gap:.55rem;align-items:flex-start;font-size:.9rem;color:var(--ink);font-weight:500;margin:0}
-.chk input{width:1.25rem;height:1.25rem;margin:.1rem 0 0;flex:0 0 auto;accent-color:var(--navy)}
-.out{margin-top:.9rem;border-radius:.6rem;background:var(--soft);border:1px solid var(--line);padding:.85rem .95rem}
-.out .big{font-family:var(--serif);font-size:1.5rem;font-weight:600;line-height:1.2}
-.out .cite{font-size:.85rem;color:var(--sub);margin-top:.2rem}
-.out ol{margin:.6rem 0 0;padding-left:1.2rem;font-size:.88rem;color:var(--ink)}
-.out ol li{margin:.15rem 0}
+.chk{display:flex;gap:.55rem;align-items:flex-start;font-size:.9rem;color:var(--ink);font-weight:500;margin:0;cursor:pointer}
+.chk input{width:1.2rem;height:1.2rem;margin:.12rem 0 0;flex:0 0 auto;accent-color:var(--accent)}
 .warn{color:var(--warn);font-size:.85rem;font-weight:600}
-.fine{font-size:.8rem;color:var(--sub);margin:.7rem 0 0}
-.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-dl.dec{display:grid;grid-template-columns:max-content 1fr;gap:.3rem .9rem;margin:.6rem 0 0;font-size:.92rem}
-dl.dec dt{color:var(--sub);font-weight:600}
+.fine{font-size:.8rem;color:var(--sub);margin:.8rem 0 0}
+.mono{font-family:var(--mono)}
+
+/* document-style views */
+.doc{background:var(--docbg);border:1px solid var(--line);border-radius:.5rem;box-shadow:var(--shadow);padding:1.1rem 1.15rem 1.2rem;min-width:0}
+@media(min-width:760px){.doc{padding:1.5rem 1.8rem 1.6rem}}
+.doc-meta{display:flex;flex-wrap:wrap;gap:.3rem .9rem;font-size:.78rem;color:var(--mute);margin:0 0 .6rem}
+.doc-meta b{color:var(--sub);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:.7rem}
+.doc h2.dt{font-family:var(--serif);font-weight:700;font-size:1.3rem;line-height:1.25;margin:0 0 .25rem}
+.doc .big{font-family:var(--serif);font-size:1.55rem;font-weight:700;line-height:1.2;margin:.15rem 0 .2rem;color:var(--ink)}
+@media(min-width:760px){.doc .big{font-size:1.85rem}}
+.doc .cite{font-size:.86rem;color:var(--sub);margin-top:.15rem}
+.doc .rule{height:1px;background:var(--line);margin:.9rem 0}
+.doc ol.steps{margin:.4rem 0 0;padding-left:1.4rem;font-family:var(--serif);font-size:.98rem;line-height:1.55}
+.doc ol.steps li{margin:.18rem 0;padding-left:.2rem}
+.doc .prose{font-family:var(--serif);font-size:.98rem;line-height:1.62;color:var(--ink)}
+.doc .prose p{margin:.55rem 0}
+.doc .placeholder{color:var(--sub);font-family:var(--serif);font-size:1.15rem}
+dl.dec{display:grid;grid-template-columns:max-content 1fr;gap:.45rem 1rem;margin:.7rem 0 0;font-size:.95rem}
+dl.dec dt{color:var(--sub);font-weight:700;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;padding-top:.15rem}
 dl.dec dd{margin:0}
-.saved{list-style:none;margin:.7rem 0 0;padding:0;max-height:22rem;overflow:auto}
-.saved li{display:flex;gap:.4rem;align-items:center;border-top:1px solid var(--line);padding:.35rem 0}
-.saved li:first-child{border-top:0}
-.saved .go{flex:1;min-width:0;text-align:left;background:none;border:0;color:var(--ink);font:inherit;cursor:pointer;min-height:2.75rem;padding:.2rem .1rem}
-.saved .go b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.saved .go span{display:block;font-size:.8rem;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.saved .del{background:none;border:0;color:var(--sub);font-size:1.1rem;min-width:2.75rem;min-height:2.75rem;cursor:pointer;border-radius:.4rem}
-.empty{color:var(--sub);font-size:.9rem;margin:.6rem 0 0}
-/* directory */
-.dirs{margin-top:1.4rem;columns:1;column-gap:1rem}
-@media(min-width:760px){.dirs{columns:2}}
-@media(min-width:1180px){.dirs{columns:3}}
-.dir{break-inside:avoid;background:var(--card);border:1px solid var(--line);border-radius:.8rem;box-shadow:var(--shadow);margin:0 0 1rem;padding:.85rem .5rem .4rem;display:inline-block;width:100%}
-.dir h2{font-size:1.05rem;padding:0 .55rem .4rem;border-bottom:1px solid var(--line);margin:0}
-.dir .cnt{margin-left:auto;font:600 .75rem var(--sans);color:var(--sub)}
-.lk{display:grid;grid-template-columns:1fr auto;gap:0 .6rem;padding:.55rem .55rem;border-radius:.45rem;text-decoration:none;color:var(--ink);min-height:2.75rem}
-.lk+.lk{border-top:1px solid var(--line)}
-.lk:hover{background:var(--soft)}
-.lk-t{font-weight:600;font-size:.95rem;color:var(--accent)}
-.lk-d{grid-column:1;font-size:.82rem;color:var(--sub)}
-.lk-h{grid-row:1/3;grid-column:2;align-self:center;font-size:.72rem;color:var(--sub);max-width:9.5rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-@media(max-width:420px){.lk-h{display:none}}
-.hidden{display:none!important}
-mark{background:#ffe08a;color:#000;border-radius:2px}
-.contact{display:grid;gap:.3rem;font-size:.92rem;margin-top:.2rem}
+.case-no{font-family:var(--mono);font-size:1.25rem;font-weight:700;letter-spacing:.01em;word-break:break-all}
+
+/* results */
+.rlayout{display:grid;gap:1rem}
+@media(min-width:1100px){.rlayout{grid-template-columns:250px minmax(0,1fr);align-items:start}}
+.facets{background:var(--surface);border:1px solid var(--line);border-radius:.5rem;padding:.4rem 0 .6rem;display:none}
+@media(min-width:1100px){.facets{display:block;position:sticky;top:calc(var(--toph) + 1rem);max-height:calc(100vh - var(--toph) - 2rem);overflow:auto}}
+.facets.open{display:block;position:fixed;left:0;right:0;bottom:0;z-index:70;max-height:80vh;overflow:auto;border-radius:1rem 1rem 0 0;padding-bottom:calc(env(safe-area-inset-bottom) + 1rem);box-shadow:0 -8px 30px rgba(0,0,0,.25)}
+@media(min-width:1100px){.facets.open{position:sticky;border-radius:.5rem;box-shadow:none;z-index:auto;left:auto;right:auto;bottom:auto}}
+.facets .fh{display:flex;align-items:center;justify-content:space-between;padding:.45rem 1rem .5rem;border-bottom:1px solid var(--line2)}
+.facets .fh b{font-family:var(--serif);font-size:1.05rem}
+.facets fieldset{border:0;margin:0;padding:.85rem 1rem .2rem;min-width:0}
+.facets legend{float:left;width:100%;font:700 .68rem var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);padding:0;margin:0 0 .35rem}
+.facets legend+*{clear:both}
+.facets .chk{padding:.32rem 0;font-size:.88rem;align-items:center}
+.facets .chk input{margin:0}
+.facets .chk .c{margin-left:auto;font-size:.76rem;color:var(--mute);font-weight:600;padding-left:.5rem}
+.facets .done{display:none}
+@media(max-width:1099.98px){.facets .done{display:inline-flex}}
+.facets ul.flist{list-style:none;margin:0;padding:0}
+.facets ul.flist a,.facets ul.flist button{display:flex;align-items:center;gap:.5rem;width:100%;padding:.48rem 1rem;border:0;background:none;text-align:left;color:var(--ink);text-decoration:none;font-size:.89rem;cursor:pointer;min-height:2.5rem;border-left:3px solid transparent}
+.facets ul.flist [aria-current=true],.facets ul.flist [aria-pressed=true]{border-left-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600}
+.facets ul.flist .c{margin-left:auto;font-size:.76rem;color:var(--mute)}
+.rbar{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .8rem;margin:0 0 .6rem}
+.rbar .rcount{font-size:.9rem;color:var(--sub);margin:0 auto 0 0}
+@media(max-width:1099.98px){.rbar .rcount{flex-basis:100%}}
+.rbar .rcount b{color:var(--ink)}
+.rbar select{width:auto;min-height:2.5rem;font-size:.88rem;padding:.3rem .5rem}
+.rbar .fbtn{display:inline-flex}
+@media(min-width:1100px){.rbar .fbtn{display:none}}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem;margin:0 0 .7rem}
+.chip{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:.25rem .4rem .25rem .7rem;font-size:.8rem;font-weight:600;color:var(--sub);cursor:pointer;min-height:2rem}
+.chip span{font-size:.95rem;line-height:1}
+.rgroup{margin:0 0 1rem}
+.rgroup>h2{font-family:var(--serif);font-size:1.05rem;font-weight:700;margin:0 0 .4rem;display:flex;align-items:center;gap:.5rem}
+.rgroup>h2 .c{font:600 .76rem var(--sans);color:var(--mute)}
+ol.results,ul.results{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:.5rem;box-shadow:var(--shadow)}
+.res{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.1rem .7rem;padding:.75rem .85rem .8rem;border-top:1px solid var(--line2)}
+.res:first-child{border-top:0}
+.res .rn{font-size:.78rem;color:var(--mute);font-weight:600;padding-top:.18rem;min-width:1.3rem;text-align:right}
+.res .rb{min-width:0}
+.res .rt{font-family:var(--serif);font-weight:700;font-size:1.04rem;line-height:1.3;color:var(--link);text-decoration:none}
+.res .rt:hover{text-decoration:underline}
+.res .rt .ext{font-family:var(--sans);font-size:.75rem;color:var(--mute);margin-left:.2rem}
+.res .rm{display:flex;flex-wrap:wrap;align-items:center;gap:.15rem .5rem;font-size:.78rem;color:var(--mute);margin-top:.15rem}
+.badge{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:3px;padding:0 .35rem;font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--sub);background:var(--surface2);line-height:1.5}
+.badge.tool{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.badge.doc{border-color:var(--link);color:var(--link)}
+.res .rd{margin:.25rem 0 0;font-size:.88rem;color:var(--ink);line-height:1.45}
+.res .ra{display:flex;flex-direction:column;gap:.2rem}
+.star{width:2.6rem;height:2.6rem;border:0;background:none;border-radius:.4rem;cursor:pointer;color:var(--mute);display:grid;place-items:center}
+.star svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.star[aria-pressed=true]{color:var(--accent)}
+.star[aria-pressed=true] svg{fill:currentColor}
+.star:hover{background:var(--surface2)}
+@media(max-width:520px){.res{grid-template-columns:minmax(0,1fr) auto;padding:.75rem .7rem .8rem .85rem}.res .rn{display:none}}
+.empty{color:var(--sub);font-size:.92rem;padding:1rem;margin:0}
+.detect{border-left:4px solid var(--accent)}
+
+/* home */
+.hero{background:var(--surface);border:1px solid var(--line);border-radius:.5rem;padding:1.1rem 1rem;box-shadow:var(--shadow);margin-bottom:1rem}
+@media(min-width:760px){.hero{padding:1.5rem 1.6rem}}
+.hero h1{font-family:var(--serif);font-weight:700;font-size:1.55rem;line-height:1.2;margin:0}
+@media(min-width:760px){.hero h1{font-size:1.9rem}}
+.hero p{margin:.35rem 0 .9rem;color:var(--sub);font-size:.93rem;max-width:64ch}
+.sugg{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.2rem}
+.sugg button{border:1px solid var(--line);background:var(--surface2);border-radius:999px;padding:.35rem .8rem;font-size:.84rem;font-weight:600;color:var(--sub);cursor:pointer;min-height:2.35rem}
+.sugg button:hover{border-color:var(--accent);color:var(--accent)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:1rem}
+@media(min-width:760px){.tiles{grid-template-columns:repeat(4,1fr)}}
+.tile{display:flex;flex-direction:column;gap:.35rem;padding:.85rem .85rem .9rem;border:1px solid var(--line);border-radius:.45rem;background:var(--surface);text-decoration:none;color:var(--ink);min-height:6rem}
+.tile:hover{border-color:var(--accent)}
+.tile .ti{color:var(--accent)}
+.tile b{font-size:.95rem;line-height:1.25}
+.tile span{font-size:.78rem;color:var(--sub);line-height:1.35}
+ul.plain{list-style:none;margin:0;padding:0}
+ul.plain li{border-top:1px solid var(--line2)}
+ul.plain li:first-child{border-top:0}
+.row{display:flex;align-items:center;gap:.7rem;padding:.6rem 1rem;text-decoration:none;color:var(--ink);min-height:2.9rem;width:100%;background:none;border:0;text-align:left;cursor:pointer;font-size:.92rem}
+.row:hover{background:var(--surface2)}
+.row .ri{color:var(--mute)}
+.row .rs{display:block;font-size:.76rem;color:var(--mute);margin-top:.05rem}
+.row .rc{margin-left:auto;font-size:.78rem;color:var(--mute);white-space:nowrap}
+.row .rx{min-width:0;flex:1}
+.row .rx b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.contact{display:grid;gap:.55rem;font-size:.92rem}
 .contact a{font-weight:600}
-#nores{margin-top:1rem}
-footer{max-width:1320px;margin:0 auto;padding:1.2rem 1rem calc(env(safe-area-inset-bottom) + 2rem);color:var(--sub);font-size:.85rem;border-top:1px solid var(--line)}
-footer p{margin:.35rem 0}
+
+/* saved */
+.saved{list-style:none;margin:0;padding:0}
+.saved li{display:flex;gap:.4rem;align-items:center;border-top:1px solid var(--line2);padding:.2rem .4rem .2rem .9rem}
+.saved li:first-child{border-top:0}
+.saved .go{flex:1;min-width:0;text-align:left;background:none;border:0;color:var(--ink);font:inherit;cursor:pointer;min-height:3rem;padding:.4rem .1rem}
+.saved .go b{display:block;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--serif);font-size:1rem;color:var(--link)}
+.saved .go span{display:block;font-size:.78rem;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.saved .del{background:none;border:0;color:var(--mute);font-size:1.05rem;min-width:2.75rem;min-height:2.75rem;cursor:pointer;border-radius:.4rem}
+.saved .del:hover{background:var(--surface2);color:var(--accent)}
+.saved .tag{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--line);border-radius:3px;padding:0 .3rem;margin-right:.3rem;color:var(--sub)}
+
+footer{max-width:1600px;margin:0 auto;padding:1.2rem 1rem 2rem;color:var(--sub);font-size:.8rem;border-top:1px solid var(--line)}
+@media(min-width:960px){footer{padding-left:calc(var(--railw) + 1.6rem)}}
+footer p{margin:.35rem 0;max-width:110ch}
 footer strong{color:var(--ink)}
-.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 1.2rem);transform:translate(-50%,1rem);background:#14213d;color:#fff;padding:.6rem 1rem;border-radius:.6rem;font-weight:600;font-size:.9rem;opacity:0;transition:.2s;pointer-events:none;z-index:60;max-width:90vw}
+.toast{position:fixed;left:50%;bottom:calc(var(--botnav) + env(safe-area-inset-bottom) + 1rem);transform:translate(-50%,1rem);background:#1e1e1e;color:#fff;padding:.6rem 1rem;border-radius:.45rem;font-weight:600;font-size:.9rem;opacity:0;transition:.2s;pointer-events:none;z-index:95;max-width:90vw;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+:root[data-theme=dark] .toast{background:#ebecee;color:#111}
+@media(min-width:960px){.toast{bottom:1.5rem}}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
-@media print{.top,.toast,.acts,#portal .acts{display:none}body{background:#fff}}
+@media print{.top,.rail,.botnav,.toast,.acts,.facets,.crumbs,.scrim{display:none!important}body{background:#fff;padding:0}.shell{display:block}.doc,.panel{box-shadow:none}}
+
+.saved .go span.tag{display:inline-block;vertical-align:1px}
+.grouped .badge{display:none}
+@media(min-width:960px){.rail{border-right:0;background:transparent}}
+
+@media(max-width:520px){.f.dl{grid-template-columns:1fr 1fr}.f.dl>div{grid-column:1/-1}.f.dl>.half{grid-column:auto}}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol><symbol id="i-cases" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></symbol><symbol id="i-deadlines" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M12 13v3l2 1.2"/></symbol><symbol id="i-documents" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol><symbol id="i-links" viewBox="0 0 24 24"><path d="M12 3l9 5H3z"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18"/></symbol><symbol id="i-saved" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5M12 7.5V12l3 2"/></symbol><symbol id="i-more" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></symbol><symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/></symbol><symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></symbol><symbol id="i-scales" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 5h14"/><path d="M5 5l-2.5 6a2.9 2.9 0 0 0 5 0Z"/><path d="M19 5l-2.5 6a2.9 2.9 0 0 0 5 0Z"/><path d="M8 21h8"/></symbol><symbol id="i-hash" viewBox="0 0 24 24"><path d="M5 9h14M5 15h14M10 4 8 20M16 4l-2 16"/></symbol><symbol id="i-core" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h8"/></symbol><symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="i-filter" viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></symbol></svg>
 <a class="skip" href="#main">Skip to main content</a>
-<header class="top">
+<header class="top" id="top">
  <div class="top-in">
-  <a class="brand" href="#main" aria-label="Duval Court Records, top">
-   <span class="crest" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a45a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 5h14"/><path d="M5 5l-2.5 6a2.9 2.9 0 0 0 5 0Z"/><path d="M19 5l-2.5 6a2.9 2.9 0 0 0 5 0Z"/><path d="M8 21h8"/></svg></span>
+  <a class="brand" href="#/" aria-label="Duval Court Records, home">
+   <span class="mono-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#i-scales"/></svg></span>
    <span><small>Duval · 4th Circuit</small><b>Duval Court Records</b></span>
   </a>
-  <div class="search" role="search">
-   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-   <label for="filter" class="hidden">Filter every link and tool</label>
-   <input id="filter" type="search" aria-label="Filter every link and tool on this page" placeholder="Filter: judge, sunbiz, CF, efile, fees…" autocomplete="off" aria-describedby="fstatus">
+  <form class="gsearch" id="gsearch" role="search" onsubmit="return false">
+   <span class="gs-scope" aria-hidden="true"><svg class="i" aria-hidden="true"><use href="#i-filter"/></svg>All content</span>
+   <label for="gq" class="sr">Search all tools, court links and documents</label>
+   <input id="gq" type="search" enterkeyhint="search" placeholder="Search cases, deadlines, judges…" autocomplete="off" spellcheck="false">
    <kbd aria-hidden="true">/</kbd>
+   <button class="gs-clear" type="button" id="gclear" aria-label="Clear search">✕</button>
+   <button class="gs-go" type="submit" id="ggo" aria-label="Search"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></button>
+  </form>
+  <div class="top-acts">
+   <button class="ibtn" id="theme" type="button" aria-label="Toggle dark mode" title="Dark mode"><svg class="i" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
-  <button class="tbtn" id="theme" type="button" aria-label="Toggle dark mode" title="Dark mode"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg></button>
-  <nav class="nav" aria-label="Sections">
-   <a href="#portal">CORE</a><a href="#deadline">Deadlines</a><a href="#casenum">Case #</a><a href="#searches">Saved</a><a href="#quick">Quick dial</a><a href="#clerk">Clerk of Courts</a><a href="#clerkservices">Clerk services &amp; records</a><a href="#circuit">Fourth Judicial Circuit</a><a href="#selfhelp">Self-help &amp; forms</a><a href="#filing">Filing &amp; attorney tools</a><a href="#federal">Federal courts</a><a href="#records">Justice partners &amp; public records</a><a href="#research">Law &amp; research</a><a href="#clerks">Other clerks</a><a href="#bars">Bar associations</a><a href="#schools">Law schools</a><a href="#community">Community &amp; news</a><a href="#access">Accessibility</a>
-  </nav>
  </div>
- <p class="status" id="fstatus" aria-live="polite"></p>
 </header>
 
-<main id="main">
- <section class="hero fsec item" id="portal" data-k="core portal login account clerk records search case">
-  <div>
-   <h1>CORE &amp; the Clerk</h1>
-   <p>Official Duval Clerk of Courts portals. Sign in on the Clerk's own site with your own account. This page never sees or stores credentials.</p>
-  </div>
-  <div class="acts">
-   <a class="btn pri" href="https://core.duvalclerk.com/CoreCms.aspx?mode=PublicAccess" target="_blank" rel="noopener">Open CORE case search ↗</a>
-   <a class="btn" href="https://core.duvalclerk.com/CoreCms.aspx" target="_blank" rel="noopener">CORE login</a>
-   <a class="btn" href="https://core.duvalclerk.com/CreateAccount.aspx" target="_blank" rel="noopener">Create CORE account</a>
-   <a class="btn" href="https://www.myflcourtaccess.com/" target="_blank" rel="noopener">E-Filing Portal</a>
-   <a class="btn" href="https://www.duvalclerk.com/" target="_blank" rel="noopener">Clerk website</a>
-   <a class="btn" href="https://www.duvalclerk.com/online-option/court-records" target="_blank" rel="noopener">Access rules &amp; Security Matrix</a>
-  </div>
- </section>
+<div class="shell">
+ <nav class="rail" id="rail" aria-label="Main">
+  <div class="sheet-h"><b>Menu</b><button class="ibtn" type="button" id="railclose" aria-label="Close menu"><svg class="i" aria-hidden="true"><use href="#i-close"/></svg></button></div>
+  <h2>Research</h2>
+  <ul><li><a href="#/" data-nav="search"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><span>Search</span></a></li><li><a href="#/cases" data-nav="cases"><svg class="i" aria-hidden="true"><use href="#i-cases"/></svg><span>Cases</span></a></li><li><a href="#/deadlines" data-nav="deadlines"><svg class="i" aria-hidden="true"><use href="#i-deadlines"/></svg><span>Deadlines</span></a></li><li><a href="#/documents" data-nav="documents"><svg class="i" aria-hidden="true"><use href="#i-documents"/></svg><span>Documents</span></a></li><li><a href="#/links" data-nav="links"><svg class="i" aria-hidden="true"><use href="#i-links"/></svg><span>Court links</span><span class="n" id="n-links"></span></a></li><li><a href="#/saved" data-nav="saved"><svg class="i" aria-hidden="true"><use href="#i-saved"/></svg><span>Saved &amp; folders</span><span class="n" id="n-saved"></span></a></li><li><a href="#/history" data-nav="history"><svg class="i" aria-hidden="true"><use href="#i-history"/></svg><span>History</span><span class="n" id="n-history"></span></a></li></ul>
+  <p class="railnote">Independent launcher for official Duval &amp; Florida court sites. Not legal advice. Nothing leaves this device.</p>
+ </nav>
 
- <div class="grid tools">
-  <section class="card fsec item" id="deadline" aria-labelledby="h-dl" data-k="deadline calculator due date compute time 2.514 days holiday weekend mail answer appeal rehearing discovery interrogatories summary judgment">
-   <h2 id="h-dl"><span class="h-ic" aria-hidden="true">⏱</span>Florida deadline calculator</h2>
-   <p class="lead">Fla. R. Gen. Prac. &amp; Jud. Admin. 2.514, with 4th Circuit court and Duval Clerk holidays for 2026–2027.</p>
-   <form id="dlform" class="f" onsubmit="return false">
-    <div class="full"><label for="preset">Deadline</label><select id="preset"><option value="custom">Custom period</option></optgroup><optgroup label="Civil"><option value="ans">Answer to complaint — 20 days</option><option value="cc">Answer to counterclaim / crossclaim; reply — 20 days</option><option value="state">Answer by State / agency (non-§768.28) — 40 days</option><option value="rogs">Answers to interrogatories — 30 days</option><option value="rfp">Response to request for production — 30 days</option><option value="rfa">Response to requests for admission — 30 days</option><option value="msj">Response to motion for summary judgment — 40 days</option><option value="pfs">Accept proposal for settlement — 30 days</option><option value="reh">Motion for rehearing / new trial — 15 days</option><option value="fees">Motion for costs / attorney’s fees — 30 days</option></optgroup><optgroup label="Family"><option value="fam">Response to petition — 20 days</option><option value="famreh">Motion for rehearing / new trial — 15 days</option></optgroup><optgroup label="Appeal"><option value="noa">Notice of appeal — 30 days</option><option value="xa">Notice of cross-appeal — 15 days</option><option value="ib">Initial brief — 70 days</option><option value="ab">Answer brief / reply brief — 30 days</option><option value="areh">Motion for rehearing (appellate) — 15 days</option></optgroup><optgroup label="Criminal"><option value="crnoa">Notice of appeal (criminal) — 30 days</option><option value="crnt">Motion for new trial (noncapital) — 10 days</option><option value="crdisc">State’s discovery exhibit — 15 days</option></optgroup></select></div>
-    <div><label for="trig">Trigger date (<span id="trigl">trigger event</span>)</label><input id="trig" type="date" required></div>
-    <div><label for="days">Days</label><input id="days" type="number" min="1" max="999" value="20" inputmode="numeric"></div>
-    <div><label for="dir">Direction</label><select id="dir"><option value="after">After the trigger</option><option value="before">Before the trigger (e.g. before a hearing)</option></select></div>
-    <div style="align-self:end"><label class="chk" for="mail"><input type="checkbox" id="mail"><span>Served <b>only by mail</b> (+5 days, R. 2.514(b))</span></label></div>
-   </form>
-   <div class="out" id="dlout" aria-live="polite"><div class="big">Pick a trigger date</div></div>
-   <div class="acts" style="margin-top:.6rem"><button class="btn sm" type="button" id="dlcopy">Copy result</button><button class="btn sm" type="button" id="dlics">Add to calendar (.ics)</button></div>
-   <p class="fine"><b>How it counts (R. 2.514(a)(1)):</b> counting begins on the next day that is not a Saturday, Sunday or legal holiday; every day is counted after that; if the last day is a Saturday, Sunday or legal holiday the deadline moves to the next day that is not. Periods under 7 days skip weekends and holidays (R. 2.514(a)(2)). The last day ends 11:59:59 p.m. Eastern for e-filing (R. 2.514(a)(4)). <b>Mail:</b> the current rule adds 5 days only when service was made <i>only by mail</i> (R. 2.514(b), July 1, 2026 rules); e-mail and portal service get no extra days. Rules of Civil Procedure 1.090(a) defers to 2.514. Holidays: <a href="https://www.jud4.org/court-holiday-schedule" target="_blank" rel="noopener">4th Circuit court holidays</a> and <a href="https://www.duvalclerk.com/about/clerk-holiday-schedule" target="_blank" rel="noopener">Clerk closings</a> (R. 2.514(a)(6)). Court-ordered closures or extensions are not included. <b>Verify every deadline against the current rules, any court order, and the case docket.</b> Rule text: <a href="https://www.floridabar.org/rules/ctproc/" target="_blank" rel="noopener">The Florida Bar, court rules</a>.</p>
+ <main id="main" tabindex="-1">
+
+  <section class="view" id="v-search" data-view="search" aria-labelledby="h-search">
+   <div id="home">
+    <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="#/">Home</a></li><li aria-current="page">Search</li></ol></nav>
+    <div class="hero">
+     <p class="eyebrow">Duval County · Fourth Judicial Circuit</p>
+     <h1 id="h-search">What are you researching?</h1>
+     <p>One search across the CORE portal, the Rule 2.514 deadline calculator, the case number decoder, your saved items, and 129 verified court, clerk and research links.</p>
+     <div class="sugg" id="sugg" aria-label="Suggested searches">
+      <button type="button" data-q="16-2026-CA-001234">16-2026-CA-001234</button><button type="button" data-q="answer to complaint">answer to complaint</button><button type="button" data-q="judges">judges</button><button type="button" data-q="efile">efile</button><button type="button" data-q="family forms">family forms</button><button type="button" data-q="sunbiz">sunbiz</button><button type="button" data-q="public defender">public defender</button>
+     </div>
+     <div class="tiles">
+      <a class="tile" href="https://core.duvalclerk.com/CoreCms.aspx?mode=PublicAccess" target="_blank" rel="noopener"><span class="ti"><svg class="i" aria-hidden="true"><use href="#i-core"/></svg></span><b>CORE case search ↗</b><span>Clerk's official portal</span></a>
+      <a class="tile" href="#/deadlines"><span class="ti"><svg class="i" aria-hidden="true"><use href="#i-deadlines"/></svg></span><b>Compute a deadline</b><span>R. 2.514 · 20 presets · holidays</span></a>
+      <a class="tile" href="#/cases"><span class="ti"><svg class="i" aria-hidden="true"><use href="#i-hash"/></svg></span><b>Decode a case number</b><span>County, year, court type</span></a>
+      <a class="tile" href="#/saved"><span class="ti"><svg class="i" aria-hidden="true"><use href="#i-saved"/></svg></span><b>Saved &amp; folders</b><span id="tile-saved">Names, cases &amp; links</span></a>
+     </div>
+    </div>
+    <div class="cols two">
+     <section class="panel" aria-labelledby="h-recent"><div class="ph"><svg class="i" aria-hidden="true"><use href="#i-history"/></svg><h2 id="h-recent">Recent research</h2><a class="more" href="#/history">All history</a></div><ul class="plain" id="recent"></ul></section>
+     <section class="panel" aria-labelledby="h-browse"><div class="ph"><svg class="i" aria-hidden="true"><use href="#i-links"/></svg><h2 id="h-browse">Browse court links</h2><a class="more" href="#/links">View all</a></div><ul class="plain" id="browse"></ul></section>
+    </div>
+   </div>
+   <div id="results" hidden>
+    <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="#/">Home</a></li><li>Search</li><li aria-current="page" id="crumb-q"></li></ol></nav>
+    <div class="vh"><div><p class="eyebrow">Search results</p><h1 id="h-results">Results</h1></div></div>
+    <div class="rlayout">
+     <aside class="facets" id="facets" aria-label="Filter results">
+      <div class="fh"><b>Filters</b><span><button class="btn sm link" type="button" id="fclear">Clear</button><button class="btn sm done" type="button" data-close="facets">Done</button></span></div>
+      <fieldset><legend>Content type</legend><div id="f-type"></div></fieldset>
+      <fieldset><legend>Category</legend><div id="f-sec"></div></fieldset>
+     </aside>
+     <div class="stack" style="gap:.2rem">
+      <div class="rbar">
+       <p class="rcount" id="rcount" aria-live="polite"></p>
+       <button class="btn sm fbtn" type="button" id="fopen"><svg class="i" aria-hidden="true"><use href="#i-filter"/></svg>Filters</button>
+       <label for="sort" class="sr">Sort results</label>
+       <select id="sort"><option value="rel">Sort: Relevance</option><option value="az">Sort: Title A–Z</option></select>
+      </div>
+      <div class="chips" id="chips"></div>
+      <div id="detect"></div>
+      <ol class="results" id="rlist"></ol>
+     </div>
+    </div>
+   </div>
   </section>
 
-  <section class="card fsec item" id="casenum" aria-labelledby="h-cn" data-k="case number decoder formatter uniform case numbering court type CA CC CF DR MM CP DP CJ SC TR CT GA MH AP IN CO MO copy core search">
-   <h2 id="h-cn"><span class="h-ic" aria-hidden="true">#</span>Case number decoder</h2>
-   <p class="lead">Paste any Florida uniform case number (e.g. <span class="mono">16-2026-CA-001234-XXXX-MA</span>, <span class="mono">2026CA1234</span>).</p>
-   <label for="cn">Case number</label>
-   <input id="cn" type="text" class="mono" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="16-2026-CA-001234">
-   <div class="out" id="cnout" aria-live="polite"><div class="cite">Decodes county, year, court type and sequence.</div></div>
-   <div class="acts" style="margin-top:.6rem">
-    <button class="btn sm" type="button" id="cncopy">Copy for CORE search</button>
-    <button class="btn sm" type="button" id="cnsave">Save to my searches</button>
-    <a class="btn sm" href="https://core.duvalclerk.com/CoreCms.aspx?mode=PublicAccess" target="_blank" rel="noopener" id="cnopen">Open CORE ↗</a>
-   </div>
-   <p class="fine">Format per the Uniform Case Numbering System (Fla. R. Gen. Prac. &amp; Jud. Admin. 2.245(b)): county code (Duval&nbsp;=&nbsp;16) – year – court type – sequence. Court types follow the Florida Supreme Court's <a href="https://www.duvalclerk.com/online-option/court-records" target="_blank" rel="noopener">Access Security Matrix</a>. Duval's trailing party/location suffix (e.g. <span class="mono">-XXXX-MA</span>) is kept exactly as you typed it.</p>
-  </section>
-
-  <section class="card fsec item" id="searches" aria-labelledby="h-sv" data-k="saved searches notes names case numbers export import json backup copy core">
-   <h2 id="h-sv"><span class="h-ic" aria-hidden="true">✎</span>My saved searches &amp; notes</h2>
-   <p class="lead">Stored only in this browser. Tap one to copy it and open CORE. Export to move them to another device.</p>
-   <div class="f">
-    <div><label for="q">Name or case number</label><input id="q" type="text" autocomplete="off" placeholder="Smith, John or 16-2026-CA-001234"></div>
-    <div><label for="qn">Note (optional)</label><input id="qn" type="text" autocomplete="off" placeholder="Client, hearing date, division…"></div>
-   </div>
-   <div class="acts" style="margin-top:.6rem">
-    <button class="btn sm pri" id="add" type="button">Save</button>
-    <button class="btn sm" id="exp" type="button">Export JSON</button>
-    <button class="btn sm" id="impb" type="button">Import JSON</button>
-    <input id="imp" type="file" accept="application/json,.json" class="hidden" aria-label="Import saved searches JSON file">
-   </div>
-   <ul class="saved" id="list" aria-label="Saved searches"></ul>
-   <p class="fine">Keep client-confidential details out of shared or public computers.</p>
-  </section>
-
-  <section class="card fsec item" id="quick" aria-labelledby="h-qd" data-k="quick dial phone address courthouse clerk 501 adams contact fee schedule fees">
-   <h2 id="h-qd"><span class="h-ic" aria-hidden="true">☎</span>Quick dial</h2>
-   <div class="contact">
+  <section class="view" id="v-cases" data-view="cases" aria-labelledby="h-cases" hidden>
+   <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="#/">Home</a></li><li aria-current="page">Cases</li></ol></nav>
+   <div class="vh"><div><p class="eyebrow">Cases</p><h1 id="h-cases">Case research</h1><p>CORE portal, case number decoder, and the record searches practitioners use most.</p></div></div>
+   <div class="cols two">
+    <div class="stack">
+     <article class="doc" id="portal" aria-labelledby="h-portal">
+      <div class="doc-meta"><b>Official portal</b><span>Duval County Clerk of Courts</span></div>
+      <h2 class="dt" id="h-portal">CORE &amp; the Clerk</h2>
+      <div class="prose"><p>Official Duval Clerk of Courts portals. Sign in on the Clerk's own site with your own account. This page never sees or stores credentials.</p></div>
+      <div class="acts" style="margin-top:.8rem"><a class="btn pri" href="https://core.duvalclerk.com/CoreCms.aspx?mode=PublicAccess" target="_blank" rel="noopener">Open CORE case search ↗</a><a class="btn" href="https://core.duvalclerk.com/CoreCms.aspx" target="_blank" rel="noopener">CORE login</a><a class="btn" href="https://core.duvalclerk.com/CreateAccount.aspx" target="_blank" rel="noopener">Create CORE account</a><a class="btn" href="https://www.myflcourtaccess.com/" target="_blank" rel="noopener">E-Filing Portal</a><a class="btn" href="https://www.duvalclerk.com/" target="_blank" rel="noopener">Clerk website</a><a class="btn" href="https://www.duvalclerk.com/online-option/court-records" target="_blank" rel="noopener">Access rules &amp; Security Matrix</a></div>
+     </article>
+     <section class="panel" id="casenum" aria-labelledby="h-cn">
+      <div class="ph"><svg class="i" aria-hidden="true"><use href="#i-hash"/></svg><h2 id="h-cn">Case number decoder</h2></div>
+      <div class="pb">
+       <p class="fine" style="margin:0 0 .7rem">Paste any Florida uniform case number (e.g. <span class="mono">16-2026-CA-001234-XXXX-MA</span>, <span class="mono">2026CA1234</span>).</p>
+       <label for="cn">Case number</label>
+       <input id="cn" type="text" class="mono" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="16-2026-CA-001234">
+       <div class="doc" id="cnout" aria-live="polite" style="margin-top:.8rem"><p class="cite">Decodes county, year, court type and sequence.</p></div>
+       <div class="acts" style="margin-top:.7rem">
+        <button class="btn sm pri" type="button" id="cncopy">Copy for CORE search</button>
+        <button class="btn sm" type="button" id="cnsave">Save to my searches</button>
+        <a class="btn sm" href="https://core.duvalclerk.com/CoreCms.aspx?mode=PublicAccess" target="_blank" rel="noopener" id="cnopen">Open CORE ↗</a>
+       </div>
+       <p class="fine">Format per the Uniform Case Numbering System (Fla. R. Gen. Prac. &amp; Jud. Admin. 2.245(b)): county code (Duval&nbsp;=&nbsp;16) – year – court type – sequence. Court types follow the Florida Supreme Court's <a href="https://www.duvalclerk.com/online-option/court-records" target="_blank" rel="noopener">Access Security Matrix</a>. Duval's trailing party/location suffix (e.g. <span class="mono">-XXXX-MA</span>) is kept exactly as you typed it.</p>
+      </div>
+     </section>
+    </div>
+    <div class="stack">
+     <section class="panel" id="quick" aria-labelledby="h-qd">
+      <div class="ph"><svg class="i" aria-hidden="true"><use href="#i-phone"/></svg><h2 id="h-qd">Quick dial</h2></div>
+      <div class="pb"><div class="contact">
     <div><b>Duval County Courthouse</b><br>501 W. Adams St., Jacksonville, FL 32202 · <a href="https://maps.apple.com/?q=501+W+Adams+St,+Jacksonville,+FL+32202" target="_blank" rel="noopener">Map</a></div>
     <div><b>Clerk of Courts (main line)</b> · <a href="tel:+19042552000">904-255-2000</a> · <a href="https://www.duvalclerk.com/contact-us" target="_blank" rel="noopener">contact directory</a></div>
     <div><b>Beaches branch</b> · 1543 Atlantic Blvd., Neptune Beach, FL 32266</div>
     <div><b>Fees</b> · <a href="https://www.duvalclerk.com/about/fee-schedules" target="_blank" rel="noopener">Clerk's official fee schedules</a> · <a href="https://www.duvalclerk.com/about/registry-fee-calculator" target="_blank" rel="noopener">registry fee calculator</a></div>
-   </div>
-   <div class="acts" style="margin-top:.8rem">
-    <a class="btn sm" href="https://www.jud4.org/circuit-and-county-judges-of-the-fourth-judicial-circuit" target="_blank" rel="noopener">Judges &amp; divisions</a>
-    <a class="btn sm" href="https://www.floridabar.org/directories/find-mbr/" target="_blank" rel="noopener">Bar member search</a>
-    <a class="btn sm" href="https://inmatesearch.jaxsheriff.org/" target="_blank" rel="noopener">JSO inmate search</a>
-    <a class="btn sm" href="https://or.duvalclerk.com/" target="_blank" rel="noopener">Official Records</a>
-    <a class="btn sm" href="https://search.sunbiz.org/Inquiry/CorporationSearch/ByName" target="_blank" rel="noopener">Sunbiz</a>
-    <a class="btn sm" href="https://paopropertysearch.coj.net/Basic/Search.aspx" target="_blank" rel="noopener">Property Appraiser</a>
-    <a class="btn sm" href="https://pacer.uscourts.gov/" target="_blank" rel="noopener">PACER</a>
+   </div></div>
+     </section>
+     <section class="panel" aria-labelledby="h-rec">
+      <div class="ph"><svg class="i" aria-hidden="true"><use href="#i-globe"/></svg><h2 id="h-rec">Record searches</h2></div>
+      <ul class="plain"><li><a class="row" href="https://www.jud4.org/circuit-and-county-judges-of-the-fourth-judicial-circuit" target="_blank" rel="noopener"><svg class="i ri" aria-hidden="true"><use href="#i-globe"/></svg><span class="rx"><b>Judges &amp; divisions</b><span class="rs">jud4.org</span></span><span class="rc">↗</span></a></li><li><a class="row" href="https://www.floridabar.org/directories/find-mbr/" target="_blank" rel="noopener"><svg class="i ri" aria-hidden="true"><use href="#i-globe"/></svg><span class="rx"><b>Bar member search</b><span class="rs">floridabar.org</span></span><span class="rc">↗</span></a></li><li><a class="row" href="https://inmatesearch.jaxsheriff.org/" target="_blank" rel="noopener"><svg class="i ri" aria-hidden="true"><use href="#i-globe"/></svg><span class="rx"><b>JSO inmate search</b><span class="rs">inmatesearch.jaxsheriff.org</span></span><span class="rc">↗</span></a></li><li><a class="row" href="https://or.duvalclerk.com/" target="_blank" rel="noopener"><svg class="i ri" aria-hidden="true"><use href="#i-globe"/></svg><span class="rx"><b>Official Records</b><span class="rs">or.duvalclerk.com</span></span><span class="rc">↗</span></a></li><li><a class="row" href="https://search.sunbiz.org/Inquiry/CorporationSearch/ByName" target="_blank" rel="noopener"><svg class="i ri" aria-hidden="true"><use href="#i-globe"/></svg><span class="rx"><b>Sunbiz</b><span class="rs">search.sunbiz.org</span></span><span class="rc">↗</span></a></li><li><a class="row" href="https://paopropertysearch.coj.net/Basic/Search.aspx" target="_blank" rel="noopener"><svg class="i ri" aria-hidden="true"><use href="#i-globe"/></svg><span class="rx"><b>Property Appraiser</b><span class="rs">paopropertysearch.coj.net</span></span><span class="rc">↗</span></a></li><li><a class="row" href="https://pacer.uscourts.gov/" target="_blank" rel="noopener"><svg class="i ri" aria-hidden="true"><use href="#i-globe"/></svg><span class="rx"><b>PACER</b><span class="rs">pacer.uscourts.gov</span></span><span class="rc">↗</span></a></li></ul>
+     </section>
+    </div>
    </div>
   </section>
- </div>
 
- <div class="card hidden" id="nores" role="status"><b>No matches.</b> Try a shorter word, a court type like “CF”, or clear the filter (Esc).</div>
+  <section class="view" id="v-deadlines" data-view="deadlines" aria-labelledby="h-dl" hidden>
+   <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="#/">Home</a></li><li aria-current="page">Deadlines</li></ol></nav>
+   <div class="vh"><div><p class="eyebrow">Deadlines</p><h1 id="h-dl">Florida deadline calculator</h1><p>Fla. R. Gen. Prac. &amp; Jud. Admin. 2.514, with 4th Circuit court and Duval Clerk holidays for 2026–2027.</p></div></div>
+   <div class="cols two" id="deadline">
+    <section class="panel" aria-labelledby="h-dlf">
+     <div class="ph"><svg class="i" aria-hidden="true"><use href="#i-deadlines"/></svg><h2 id="h-dlf">Compute</h2></div>
+     <div class="pb">
+      <form id="dlform" class="f dl" onsubmit="return false">
+       <div class="full"><label for="preset">Deadline</label><select id="preset"><option value="custom">Custom period</option><optgroup label="Civil"><option value="ans">Answer to complaint — 20 days</option><option value="cc">Answer to counterclaim / crossclaim; reply — 20 days</option><option value="state">Answer by State / agency (non-§768.28) — 40 days</option><option value="rogs">Answers to interrogatories — 30 days</option><option value="rfp">Response to request for production — 30 days</option><option value="rfa">Response to requests for admission — 30 days</option><option value="msj">Response to motion for summary judgment — 40 days</option><option value="pfs">Accept proposal for settlement — 30 days</option><option value="reh">Motion for rehearing / new trial — 15 days</option><option value="fees">Motion for costs / attorney’s fees — 30 days</option></optgroup><optgroup label="Family"><option value="fam">Response to petition — 20 days</option><option value="famreh">Motion for rehearing / new trial — 15 days</option></optgroup><optgroup label="Appeal"><option value="noa">Notice of appeal — 30 days</option><option value="xa">Notice of cross-appeal — 15 days</option><option value="ib">Initial brief — 70 days</option><option value="ab">Answer brief / reply brief — 30 days</option><option value="areh">Motion for rehearing (appellate) — 15 days</option></optgroup><optgroup label="Criminal"><option value="crnoa">Notice of appeal (criminal) — 30 days</option><option value="crnt">Motion for new trial (noncapital) — 10 days</option><option value="crdisc">State’s discovery exhibit — 15 days</option></optgroup></select></div>
+       <div><label for="trig">Trigger date (<span id="trigl">trigger event</span>)</label><input id="trig" type="date" required></div>
+       <div class="half"><label for="days">Days</label><input id="days" type="number" min="1" max="999" value="20" inputmode="numeric"></div>
+       <div class="half"><label for="dir">Direction</label><select id="dir"><option value="after">After trigger</option><option value="before">Before trigger (e.g. a hearing)</option></select></div>
+       <div style="align-self:end"><label class="chk" for="mail"><input type="checkbox" id="mail"><span>Served <b>only by mail</b> (+5 days, R. 2.514(b))</span></label></div>
+      </form>
+     </div>
+    </section>
+    <div class="stack" style="gap:.6rem">
+     <article class="doc" id="dlout" aria-live="polite"><div class="placeholder">Pick a trigger date</div></article>
+     <div class="acts"><button class="btn sm pri" type="button" id="dlcopy">Copy result</button><button class="btn sm" type="button" id="dlics">Add to calendar (.ics)</button><button class="btn sm" type="button" id="dlprint">Print</button></div>
+    </div>
+   </div>
+   <article class="doc" style="margin-top:1rem" aria-labelledby="h-how">
+    <div class="doc-meta"><b>Reference</b><span>Fla. R. Gen. Prac. &amp; Jud. Admin. 2.514</span></div>
+    <h2 class="dt" id="h-how">How time is computed</h2>
+    <div class="prose"><p><b>How it counts (R. 2.514(a)(1)):</b> counting begins on the next day that is not a Saturday, Sunday or legal holiday; every day is counted after that; if the last day is a Saturday, Sunday or legal holiday the deadline moves to the next day that is not. Periods under 7 days skip weekends and holidays (R. 2.514(a)(2)). The last day ends 11:59:59 p.m. Eastern for e-filing (R. 2.514(a)(4)). <b>Mail:</b> the current rule adds 5 days only when service was made <i>only by mail</i> (R. 2.514(b), July 1, 2026 rules); e-mail and portal service get no extra days. Rules of Civil Procedure 1.090(a) defers to 2.514. Holidays: <a href="https://www.jud4.org/court-holiday-schedule" target="_blank" rel="noopener">4th Circuit court holidays</a> and <a href="https://www.duvalclerk.com/about/clerk-holiday-schedule" target="_blank" rel="noopener">Clerk closings</a> (R. 2.514(a)(6)). Court-ordered closures or extensions are not included. <b>Verify every deadline against the current rules, any court order, and the case docket.</b> Rule text: <a href="https://www.floridabar.org/rules/ctproc/" target="_blank" rel="noopener">The Florida Bar, court rules</a>.</p></div>
+   </article>
+  </section>
 
- <div class="dirs">
-<section class="dir fsec" id="clerk" aria-labelledby="h-clerk"><h2 id="h-clerk"><span class="h-ic" aria-hidden="true">§</span>Clerk of Courts · divisions <span class="cnt"></span></h2><div class="links"><a class="lk item" href="https://www.duvalclerk.com/" target="_blank" rel="noopener" data-k="clerk main"><span class="lk-t">Clerk of Courts home</span><span class="lk-d">duvalclerk.com, Jody Phillips, Clerk</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/departments/civil-court-services/circuit-civil" target="_blank" rel="noopener" data-k="CA circuit civil"><span class="lk-t">Circuit Civil</span><span class="lk-d">CA cases, claims over the county court limit</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/departments/civil-court-services/county-civil" target="_blank" rel="noopener" data-k="CC county civil eviction landlord tenant"><span class="lk-t">County Civil &amp; evictions</span><span class="lk-d">CC cases, landlord/tenant</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/departments/civil-court-services/small-claims" target="_blank" rel="noopener" data-k="SC small claims"><span class="lk-t">Small Claims</span><span class="lk-d">SC cases, small claims packet &amp; filing</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/departments/civil-court-services/family-law" target="_blank" rel="noopener" data-k="DR divorce dissolution custody paternity"><span class="lk-t">Family Law</span><span class="lk-d">DR cases: divorce, custody, support</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/departments/civil-court-services/domestic-violence" target="_blank" rel="noopener" data-k="DR injunction protection order"><span class="lk-t">Domestic Violence</span><span class="lk-d">Injunctions for protection</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/departments/civil-court-services/probate" target="_blank" rel="noopener" data-k="CP GA probate estate will guardianship"><span class="lk-t">Probate &amp; Guardianship</span><span class="lk-d">CP / GA cases</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/departments/civil-court-services/mental-health" target="_blank" rel="noopener" data-k="MH baker marchman"><span class="lk-t">Mental Health</span><span class="lk-d">MH: Baker Act, Marchman Act, petitions</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/departments/civil-court-services/foreclosure" target="_blank" rel="noopener" data-k="foreclosure mortgage"><span class="lk-t">Foreclosure</span><span class="lk-d">Mortgage foreclosure filings</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/departments/criminal-court-services/felony" target="_blank" rel="noopener" data-k="CF felony criminal"><span class="lk-t">Felony</span><span class="lk-d">CF cases</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/departments/criminal-court-services/misdemeanor" target="_blank" rel="noopener" data-k="MM misdemeanor criminal"><span class="lk-t">Misdemeanor</span><span class="lk-d">MM cases</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/departments/criminal-court-services/traffic" target="_blank" rel="noopener" data-k="TR CT traffic citation ticket"><span class="lk-t">Traffic</span><span class="lk-d">TR / CT citations and cases</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/departments/criminal-court-services/juvenile" target="_blank" rel="noopener" data-k="CJ DP juvenile delinquency dependency"><span class="lk-t">Juvenile</span><span class="lk-d">CJ / DP cases</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/departments/criminal-court-services/appeals" target="_blank" rel="noopener" data-k="AP appeal"><span class="lk-t">Appeals</span><span class="lk-d">County-to-circuit appeals (AP)</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/departments/beaches-branch" target="_blank" rel="noopener" data-k="beaches neptune branch"><span class="lk-t">Beaches Branch</span><span class="lk-d">1543 Atlantic Blvd, Neptune Beach</span><span class="lk-h">duvalclerk.com</span></a></div></section>
-<section class="dir fsec" id="clerkservices" aria-labelledby="h-clerkservices"><h2 id="h-clerkservices"><span class="h-ic" aria-hidden="true">§</span>Clerk services &amp; records <span class="cnt"></span></h2><div class="links"><a class="lk item" href="https://or.duvalclerk.com/" target="_blank" rel="noopener" data-k="official records deed mortgage lien recording search"><span class="lk-t">Official Records search</span><span class="lk-d">Deeds, mortgages, liens, judgments recorded in Duval</span><span class="lk-h">or.duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/departments/county-services/official-records-and-research" target="_blank" rel="noopener" data-k="official records certified copies"><span class="lk-t">Official Records &amp; research</span><span class="lk-d">Recording, certified copies, research requests</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/online-option/efiling-information" target="_blank" rel="noopener" data-k="efile e-filing"><span class="lk-t">eFiling information</span><span class="lk-d">How e-filing works with the Clerk</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/about/fee-schedules" target="_blank" rel="noopener" data-k="fees cost filing fee schedule"><span class="lk-t">Fee schedules</span><span class="lk-d">The Clerk&#x27;s official fee schedule by division</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/about/registry-fee-calculator" target="_blank" rel="noopener" data-k="registry fee calculator deposit"><span class="lk-t">Registry fee calculator</span><span class="lk-d">Official Clerk calculator for registry deposits</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/how-do-i/make-payments/purchase-certified-copies" target="_blank" rel="noopener" data-k="certified copies"><span class="lk-t">Purchase certified copies</span><span class="lk-d">Order certified court documents</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/how-do-i/file/public-records-request" target="_blank" rel="noopener" data-k="public records request chapter 119"><span class="lk-t">Public records request</span><span class="lk-d">Request records from the Clerk</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/online-option/e-notify" target="_blank" rel="noopener" data-k="notify alerts"><span class="lk-t">E-Notify</span><span class="lk-d">Case event notifications from the Clerk</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/redirects/epay" target="_blank" rel="noopener" data-k="pay payment fines"><span class="lk-t">ePay</span><span class="lk-d">Pay criminal and traffic balances</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/how-do-i/complete-forms/civil-forms" target="_blank" rel="noopener" data-k="forms civil"><span class="lk-t">Civil forms</span><span class="lk-d">Clerk civil forms</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/how-do-i/complete-forms/family-forms" target="_blank" rel="noopener" data-k="forms family divorce"><span class="lk-t">Family forms</span><span class="lk-d">Clerk family forms</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/how-do-i/complete-forms/criminal-department-forms" target="_blank" rel="noopener" data-k="forms criminal"><span class="lk-t">Criminal department forms</span><span class="lk-d">Clerk criminal forms</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/how-do-i/complete-forms/expunge-or-seal-forms" target="_blank" rel="noopener" data-k="seal expunge expunction"><span class="lk-t">Seal or expunge forms</span><span class="lk-d">Record sealing and expunction</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/services/orders-determining-confidentiality" target="_blank" rel="noopener" data-k="confidential 2.420"><span class="lk-t">Orders determining confidentiality</span><span class="lk-d">Confidentiality orders posted by the Clerk</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/services/pre-trial-release-register" target="_blank" rel="noopener" data-k="pretrial release bond"><span class="lk-t">Pre-trial release register</span><span class="lk-d">Pretrial release register</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/services/adminorders" target="_blank" rel="noopener" data-k="administrative orders"><span class="lk-t">Clerk administrative orders</span><span class="lk-d">Orders posted by the Clerk</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/departments/jury-service" target="_blank" rel="noopener" data-k="jury juror summons"><span class="lk-t">Jury service</span><span class="lk-d">Juror information and summons</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duval.realforeclose.com/" target="_blank" rel="noopener" data-k="foreclosure sale auction"><span class="lk-t">Foreclosure sales</span><span class="lk-d">Online foreclosure auctions</span><span class="lk-h">duval.realforeclose.com</span></a><a class="lk item" href="https://www.duval.realtaxdeed.com/" target="_blank" rel="noopener" data-k="tax deed auction"><span class="lk-t">Tax deed sales</span><span class="lk-d">Online tax deed auctions</span><span class="lk-h">duval.realtaxdeed.com</span></a><a class="lk item" href="https://www.duvalclerk.com/about/clerk-holiday-schedule" target="_blank" rel="noopener" data-k="holiday closed closing"><span class="lk-t">Clerk holiday schedule</span><span class="lk-d">Office closings 2026–2027</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/about/office-locations" target="_blank" rel="noopener" data-k="address location courthouse"><span class="lk-t">Office locations</span><span class="lk-d">Courthouse and Beaches branch</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.duvalclerk.com/contact-us" target="_blank" rel="noopener" data-k="contact phone"><span class="lk-t">Contact the Clerk</span><span class="lk-d">Phone directory and contact form</span><span class="lk-h">duvalclerk.com</span></a></div></section>
-<section class="dir fsec" id="circuit" aria-labelledby="h-circuit"><h2 id="h-circuit"><span class="h-ic" aria-hidden="true">⚖</span>Fourth Judicial Circuit (courts) <span class="cnt"></span></h2><div class="links"><a class="lk item" href="https://www.jud4.org/" target="_blank" rel="noopener" data-k="jud4 circuit court"><span class="lk-t">4th Judicial Circuit</span><span class="lk-d">Duval, Clay and Nassau courts</span><span class="lk-h">jud4.org</span></a><a class="lk item" href="https://www.jud4.org/circuit-and-county-judges-of-the-fourth-judicial-circuit" target="_blank" rel="noopener" data-k="judge division JA judicial assistant"><span class="lk-t">Judges &amp; divisions</span><span class="lk-d">Circuit and county judges of the 4th Circuit</span><span class="lk-h">jud4.org</span></a><a class="lk item" href="https://www.jud4.org/ex-parte-dates-judge-s-procedures/duval-judges" target="_blank" rel="noopener" data-k="judge procedures ex parte hearing JA"><span class="lk-t">Duval judges: ex parte &amp; procedures</span><span class="lk-d">Each judge&#x27;s ex parte dates and procedures</span><span class="lk-h">jud4.org</span></a><a class="lk item" href="https://www.jud4.org/duval-county-judges-biographies" target="_blank" rel="noopener" data-k="judge biography"><span class="lk-t">Duval judges: biographies</span><span class="lk-d">Judge bios</span><span class="lk-h">jud4.org</span></a><a class="lk item" href="https://www.jud4.org/administrative-orders" target="_blank" rel="noopener" data-k="administrative orders AO"><span class="lk-t">Administrative orders</span><span class="lk-d">4th Circuit administrative orders</span><span class="lk-h">jud4.org</span></a><a class="lk item" href="https://www.jud4.org/court-administration/civil-case-management" target="_blank" rel="noopener" data-k="case management order CMO 1.200"><span class="lk-t">Civil case management</span><span class="lk-d">Case management orders and procedures</span><span class="lk-h">jud4.org</span></a><a class="lk item" href="https://www.jud4.org/proposed-orders-efiling" target="_blank" rel="noopener" data-k="proposed order"><span class="lk-t">Proposed orders e-filing</span><span class="lk-d">How to submit proposed orders</span><span class="lk-h">jud4.org</span></a><a class="lk item" href="https://www.jud4.org/foreclosure-division" target="_blank" rel="noopener" data-k="foreclosure"><span class="lk-t">Foreclosure division</span><span class="lk-d">Foreclosure judges and procedures</span><span class="lk-h">jud4.org</span></a><a class="lk item" href="https://www.jud4.org/court-administration/magistrates-and-hearing-officers" target="_blank" rel="noopener" data-k="magistrate hearing officer"><span class="lk-t">Magistrates &amp; hearing officers</span><span class="lk-d">General magistrates, hearing officers</span><span class="lk-h">jud4.org</span></a><a class="lk item" href="https://www.jud4.org/court-administration/felony-plea-forms" target="_blank" rel="noopener" data-k="plea forms felony"><span class="lk-t">Felony plea forms</span><span class="lk-d">Plea forms used in the circuit</span><span class="lk-h">jud4.org</span></a><a class="lk item" href="https://www.jud4.org/court-holiday-schedule" target="_blank" rel="noopener" data-k="holiday"><span class="lk-t">Court holiday schedule</span><span class="lk-d">Holidays observed by the courts</span><span class="lk-h">jud4.org</span></a><a class="lk item" href="https://www.jud4.org/courthouse-locations" target="_blank" rel="noopener" data-k="address courthouse location"><span class="lk-t">Courthouse locations</span><span class="lk-d">Duval, Clay and Nassau courthouses</span><span class="lk-h">jud4.org</span></a><a class="lk item" href="https://www.jud4.org/ada" target="_blank" rel="noopener" data-k="ada disability accommodation"><span class="lk-t">ADA accommodations</span><span class="lk-d">Request an accommodation</span><span class="lk-h">jud4.org</span></a><a class="lk item" href="https://www.jud4.org/court-interpreters" target="_blank" rel="noopener" data-k="interpreter spanish creole"><span class="lk-t">Court interpreters</span><span class="lk-d">Request an interpreter</span><span class="lk-h">jud4.org</span></a></div></section>
-<section class="dir fsec" id="selfhelp" aria-labelledby="h-selfhelp"><h2 id="h-selfhelp"><span class="h-ic" aria-hidden="true">⚖</span>Self-help &amp; forms <span class="cnt"></span></h2><div class="links"><a class="lk item" href="https://www.jud4.org/self-help" target="_blank" rel="noopener" data-k="self help pro se"><span class="lk-t">Self-help center</span><span class="lk-d">Getting started as a pro se litigant</span><span class="lk-h">jud4.org</span></a><a class="lk item" href="https://www.jud4.org/family-court-services/self-help" target="_blank" rel="noopener" data-k="family self help"><span class="lk-t">Family Court Services</span><span class="lk-d">Self-help for family cases</span><span class="lk-h">jud4.org</span></a><a class="lk item" href="https://www.jud4.org/court-programs/small-claims-clinics" target="_blank" rel="noopener" data-k="small claims clinic"><span class="lk-t">Small claims clinics</span><span class="lk-d">Free clinics, 4th Circuit</span><span class="lk-h">jud4.org</span></a><a class="lk item" href="https://www.duvalclerk.com/getmedia/c0682bbc-5153-49bf-b435-e0ca791255ca/SmallClaimsPacket_20200101_ADA_Compliant.pdf" target="_blank" rel="noopener" data-k="small claims packet pdf"><span class="lk-t">Small claims packet</span><span class="lk-d">The Clerk&#x27;s filing packet (PDF)</span><span class="lk-h">duvalclerk.com</span></a><a class="lk item" href="https://www.flcourts.gov/Services/family-courts/domestic-relations-court-resources/family-law-forms" target="_blank" rel="noopener" data-k="family law forms 12.9"><span class="lk-t">Florida family law forms</span><span class="lk-d">Supreme Court approved forms</span><span class="lk-h">flcourts.gov</span></a><a class="lk item" href="https://www.flcourts.gov/Services/family-courts/self-help-information" target="_blank" rel="noopener" data-k="self help"><span class="lk-t">Florida self-help information</span><span class="lk-d">Statewide self-help, Florida Courts</span><span class="lk-h">flcourts.gov</span></a><a class="lk item" href="https://www.jaxlegalaid.org/" target="_blank" rel="noopener" data-k="legal aid JALA pro bono"><span class="lk-t">Jacksonville Area Legal Aid</span><span class="lk-d">Free civil legal help</span><span class="lk-h">jaxlegalaid.org</span></a><a class="lk item" href="https://www.jud4.org/duval-county-law-library" target="_blank" rel="noopener" data-k="law library"><span class="lk-t">Duval County Law Library</span><span class="lk-d">Hours and services, 4th Circuit</span><span class="lk-h">jud4.org</span></a></div></section>
-<section class="dir fsec" id="filing" aria-labelledby="h-filing"><h2 id="h-filing"><span class="h-ic" aria-hidden="true">◆</span>Filing &amp; attorney tools <span class="cnt"></span></h2><div class="links"><a class="lk item" href="https://www.myflcourtaccess.com/" target="_blank" rel="noopener" data-k="efile e-filing portal"><span class="lk-t">Florida Courts E-Filing Portal</span><span class="lk-d">File documents in Florida state courts</span><span class="lk-h">myflcourtaccess.com</span></a><a class="lk item" href="https://www.floridabar.org/directories/find-mbr/" target="_blank" rel="noopener" data-k="bar number attorney lookup"><span class="lk-t">Florida Bar member search</span><span class="lk-d">Find a lawyer, check bar status</span><span class="lk-h">floridabar.org</span></a><a class="lk item" href="https://www.floridabar.org/rules/ctproc/" target="_blank" rel="noopener" data-k="rules civil criminal appellate family probate 2.514"><span class="lk-t">Florida court rules (official)</span><span class="lk-d">Current rules PDFs from The Florida Bar</span><span class="lk-h">floridabar.org</span></a><a class="lk item" href="https://supremecourt.flcourts.gov/" target="_blank" rel="noopener" data-k="supreme court"><span class="lk-t">Florida Supreme Court</span><span class="lk-d">Opinions, dockets, administrative orders</span><span class="lk-h">supremecourt.flcourts.gov</span></a><a class="lk item" href="https://1dca.flcourts.gov/" target="_blank" rel="noopener" data-k="1DCA appeal district court"><span class="lk-t">First District Court of Appeal</span><span class="lk-d">Appeals from Duval go here</span><span class="lk-h">1dca.flcourts.gov</span></a><a class="lk item" href="https://www.flcourts.gov/" target="_blank" rel="noopener" data-k="flcourts"><span class="lk-t">Florida Courts</span><span class="lk-d">State court system</span><span class="lk-h">flcourts.gov</span></a><a class="lk item" href="https://www.flcourts.gov/Services/information-technology/oit-resources/Court-Access" target="_blank" rel="noopener" data-k="access matrix"><span class="lk-t">Court records access (OIT)</span><span class="lk-d">Florida Courts access standards</span><span class="lk-h">flcourts.gov</span></a></div></section>
-<section class="dir fsec" id="federal" aria-labelledby="h-federal"><h2 id="h-federal"><span class="h-ic" aria-hidden="true">★</span>Federal courts <span class="cnt"></span></h2><div class="links"><a class="lk item" href="https://pacer.uscourts.gov/" target="_blank" rel="noopener" data-k="pacer federal records"><span class="lk-t">PACER</span><span class="lk-d">Federal court records</span><span class="lk-h">pacer.uscourts.gov</span></a><a class="lk item" href="https://www.flmd.uscourts.gov/locations/jacksonville" target="_blank" rel="noopener" data-k="federal district court jacksonville"><span class="lk-t">M.D. Fla. — Jacksonville Division</span><span class="lk-d">U.S. District Court, Jacksonville</span><span class="lk-h">flmd.uscourts.gov</span></a><a class="lk item" href="https://www.flmd.uscourts.gov/" target="_blank" rel="noopener" data-k="federal district court"><span class="lk-t">U.S. District Court, M.D. Fla.</span><span class="lk-d">Middle District of Florida</span><span class="lk-h">flmd.uscourts.gov</span></a><a class="lk item" href="https://ecf.flmd.uscourts.gov/" target="_blank" rel="noopener" data-k="ecf efile federal"><span class="lk-t">CM/ECF — M.D. Fla.</span><span class="lk-d">Federal e-filing for the district</span><span class="lk-h">ecf.flmd.uscourts.gov</span></a><a class="lk item" href="https://www.flmb.uscourts.gov/" target="_blank" rel="noopener" data-k="bankruptcy"><span class="lk-t">Bankruptcy Court, M.D. Fla.</span><span class="lk-d">U.S. Bankruptcy Court</span><span class="lk-h">flmb.uscourts.gov</span></a><a class="lk item" href="https://www.ca11.uscourts.gov/" target="_blank" rel="noopener" data-k="11th circuit appeals"><span class="lk-t">Eleventh Circuit</span><span class="lk-d">U.S. Court of Appeals</span><span class="lk-h">ca11.uscourts.gov</span></a><a class="lk item" href="https://www.uscourts.gov/" target="_blank" rel="noopener" data-k="federal"><span class="lk-t">U.S. Courts</span><span class="lk-d">Federal judiciary, forms and fees</span><span class="lk-h">uscourts.gov</span></a></div></section>
-<section class="dir fsec" id="records" aria-labelledby="h-records"><h2 id="h-records"><span class="h-ic" aria-hidden="true">●</span>Justice partners &amp; public records <span class="cnt"></span></h2><div class="links"><a class="lk item" href="https://sao4th.com/" target="_blank" rel="noopener" data-k="SAO state attorney prosecutor"><span class="lk-t">State Attorney, 4th Circuit</span><span class="lk-d">Prosecution, Duval/Clay/Nassau</span><span class="lk-h">sao4th.com</span></a><a class="lk item" href="https://www.pd4th.org/" target="_blank" rel="noopener" data-k="PD public defender"><span class="lk-t">Public Defender, 4th Circuit</span><span class="lk-d">Court-appointed defense</span><span class="lk-h">pd4th.org</span></a><a class="lk item" href="https://www.jaxsheriff.org/" target="_blank" rel="noopener" data-k="JSO sheriff police"><span class="lk-t">Jacksonville Sheriff&#x27;s Office</span><span class="lk-d">JSO</span><span class="lk-h">jaxsheriff.org</span></a><a class="lk item" href="https://inmatesearch.jaxsheriff.org/" target="_blank" rel="noopener" data-k="jail inmate booking search"><span class="lk-t">JSO inmate search</span><span class="lk-d">Duval jail inmate lookup</span><span class="lk-h">inmatesearch.jaxsheriff.org</span></a><a class="lk item" href="https://pubapps.fdc.myflorida.com/OffenderSearch/search.aspx" target="_blank" rel="noopener" data-k="prison DOC offender inmate"><span class="lk-t">FDC offender search</span><span class="lk-d">Florida Dept. of Corrections</span><span class="lk-h">pubapps.fdc.myflorida.com</span></a><a class="lk item" href="https://offender.fdle.state.fl.us/offender/sops/home.jsf" target="_blank" rel="noopener" data-k="FDLE sex offender registry"><span class="lk-t">Sexual offender search</span><span class="lk-d">FDLE registry</span><span class="lk-h">offender.fdle.state.fl.us</span></a><a class="lk item" href="https://www.flhsmv.gov/" target="_blank" rel="noopener" data-k="DHSMV DMV driver vehicle"><span class="lk-t">FLHSMV</span><span class="lk-d">Driver and vehicle records agency</span><span class="lk-h">flhsmv.gov</span></a><a class="lk item" href="https://mydmvportal.flhsmv.gov/home/en/publicweb/dlcheck" target="_blank" rel="noopener" data-k="driver license status suspended DHSMV"><span class="lk-t">Driver license check</span><span class="lk-d">FLHSMV license status check</span><span class="lk-h">mydmvportal.flhsmv.gov</span></a><a class="lk item" href="https://www.flhsmv.gov/traffic-crash-reports/" target="_blank" rel="noopener" data-k="crash accident report"><span class="lk-t">Crash reports</span><span class="lk-d">FLHSMV traffic crash reports</span><span class="lk-h">flhsmv.gov</span></a><a class="lk item" href="https://search.sunbiz.org/Inquiry/CorporationSearch/ByName" target="_blank" rel="noopener" data-k="sunbiz corporation LLC registered agent"><span class="lk-t">Sunbiz entity search</span><span class="lk-d">Florida corporations and LLCs</span><span class="lk-h">search.sunbiz.org</span></a><a class="lk item" href="https://paopropertysearch.coj.net/Basic/Search.aspx" target="_blank" rel="noopener" data-k="property appraiser parcel owner PAO"><span class="lk-t">Property Appraiser search</span><span class="lk-d">Duval parcel and owner search</span><span class="lk-h">paopropertysearch.coj.net</span></a><a class="lk item" href="https://www.jacksonville.gov/departments/property-appraiser" target="_blank" rel="noopener" data-k="property appraiser"><span class="lk-t">Property Appraiser</span><span class="lk-d">Office of the Duval Property Appraiser</span><span class="lk-h">jacksonville.gov</span></a><a class="lk item" href="https://taxcollector.jacksonville.gov/" target="_blank" rel="noopener" data-k="tax collector"><span class="lk-t">Tax Collector</span><span class="lk-d">Duval County Tax Collector</span><span class="lk-h">taxcollector.jacksonville.gov</span></a><a class="lk item" href="https://www.jacksonville.gov/" target="_blank" rel="noopener" data-k="city COJ"><span class="lk-t">City of Jacksonville</span><span class="lk-d">City government and services</span><span class="lk-h">jacksonville.gov</span></a><a class="lk item" href="https://www.claysheriff.com/" target="_blank" rel="noopener" data-k="sheriff clay"><span class="lk-t">Clay County Sheriff&#x27;s Office</span><span class="lk-d">Clay County law enforcement</span><span class="lk-h">claysheriff.com</span></a><a class="lk item" href="https://nassauso.com/" target="_blank" rel="noopener" data-k="sheriff nassau"><span class="lk-t">Nassau County Sheriff&#x27;s Office</span><span class="lk-d">Nassau County law enforcement</span><span class="lk-h">nassauso.com</span></a></div></section>
-<section class="dir fsec" id="research" aria-labelledby="h-research"><h2 id="h-research"><span class="h-ic" aria-hidden="true">¶</span>Law &amp; research <span class="cnt"></span></h2><div class="links"><a class="lk item" href="reader.html" data-k="statute reader usc florida"><span class="lk-t">Statute reader</span><span class="lk-d">Read U.S. Code and Florida Statutes in this app</span><span class="lk-h">in this app</span></a><a class="lk item" href="catalog.html" data-k="catalog library"><span class="lk-t">Law library catalog</span><span class="lk-d">Search the Duval County Law Library collection</span><span class="lk-h">in this app</span></a><a class="lk item" href="https://www.leg.state.fl.us/statutes/" target="_blank" rel="noopener" data-k="statutes florida"><span class="lk-t">Florida Statutes</span><span class="lk-d">Official, Florida Legislature</span><span class="lk-h">leg.state.fl.us</span></a><a class="lk item" href="https://www.flsenate.gov/Laws/Statutes" target="_blank" rel="noopener" data-k="statutes florida senate"><span class="lk-t">Florida Statutes (Senate)</span><span class="lk-d">Current statutes, Florida Senate</span><span class="lk-h">flsenate.gov</span></a><a class="lk item" href="https://flrules.org/" target="_blank" rel="noopener" data-k="FAC administrative code"><span class="lk-t">Florida Administrative Code</span><span class="lk-d">State agency rules</span><span class="lk-h">flrules.org</span></a><a class="lk item" href="https://uscode.house.gov/" target="_blank" rel="noopener" data-k="USC federal statutes"><span class="lk-t">U.S. Code</span><span class="lk-d">Official, Office of the Law Revision Counsel</span><span class="lk-h">uscode.house.gov</span></a><a class="lk item" href="https://www.ecfr.gov/" target="_blank" rel="noopener" data-k="CFR regulations"><span class="lk-t">Code of Federal Regulations</span><span class="lk-d">eCFR, updated daily</span><span class="lk-h">ecfr.gov</span></a><a class="lk item" href="https://www.supremecourt.gov/" target="_blank" rel="noopener" data-k="SCOTUS"><span class="lk-t">U.S. Supreme Court</span><span class="lk-d">Opinions, dockets, calendar</span><span class="lk-h">supremecourt.gov</span></a><a class="lk item" href="https://www.law.cornell.edu/supremecourt/text" target="_blank" rel="noopener" data-k="cornell LII"><span class="lk-t">Supreme Court collection</span><span class="lk-d">Cornell LII</span><span class="lk-h">law.cornell.edu</span></a><a class="lk item" href="https://www.courtlistener.com/" target="_blank" rel="noopener" data-k="case law opinions RECAP"><span class="lk-t">CourtListener</span><span class="lk-d">Free opinions and dockets</span><span class="lk-h">courtlistener.com</span></a><a class="lk item" href="https://www.justia.com/" target="_blank" rel="noopener" data-k="case law"><span class="lk-t">Justia</span><span class="lk-d">Free case law and codes</span><span class="lk-h">justia.com</span></a><a class="lk item" href="https://www.ca11.uscourts.gov/eleventh-circuit-library" target="_blank" rel="noopener" data-k="library"><span class="lk-t">11th Circuit library</span><span class="lk-d">Research links</span><span class="lk-h">ca11.uscourts.gov</span></a><a class="lk item" href="https://www.loc.gov/research-centers/law-library-of-congress/about-this-research-center/" target="_blank" rel="noopener" data-k="library of congress"><span class="lk-t">Law Library of Congress</span><span class="lk-d">Research guides</span><span class="lk-h">loc.gov</span></a><a class="lk item" href="https://www.copyright.gov/" target="_blank" rel="noopener" data-k="copyright"><span class="lk-t">U.S. Copyright Office</span><span class="lk-d">Copyright law and records</span><span class="lk-h">copyright.gov</span></a><a class="lk item" href="https://www.ncsc.org/" target="_blank" rel="noopener" data-k="state courts"><span class="lk-t">NCSC</span><span class="lk-d">National Center for State Courts</span><span class="lk-h">ncsc.org</span></a></div></section>
-<section class="dir fsec" id="clerks" aria-labelledby="h-clerks"><h2 id="h-clerks"><span class="h-ic" aria-hidden="true">⚖</span>Other clerks <span class="cnt"></span></h2><div class="links"><a class="lk item" href="https://clayclerk.com/" target="_blank" rel="noopener" data-k="clay clerk"><span class="lk-t">Clay County Clerk</span><span class="lk-d">Clerk of Court, Clay County (4th Circuit)</span><span class="lk-h">clayclerk.com</span></a><a class="lk item" href="https://www.nassauclerk.com/" target="_blank" rel="noopener" data-k="nassau clerk"><span class="lk-t">Nassau County Clerk</span><span class="lk-d">Clerk of Court, Nassau County (4th Circuit)</span><span class="lk-h">nassauclerk.com</span></a><a class="lk item" href="https://www.miamidadeclerk.gov/" target="_blank" rel="noopener" data-k="miami dade clerk"><span class="lk-t">Miami-Dade Clerk</span><span class="lk-d">Clerk of the Court and Comptroller</span><span class="lk-h">miamidadeclerk.gov</span></a><a class="lk item" href="https://www2.miamidadeclerk.gov/QOS/" target="_blank" rel="noopener" data-k="miami dade search"><span class="lk-t">Miami-Dade case search</span><span class="lk-d">Universal case search</span><span class="lk-h">www2.miamidadeclerk.gov</span></a></div></section>
-<section class="dir fsec" id="bars" aria-labelledby="h-bars"><h2 id="h-bars"><span class="h-ic" aria-hidden="true">○</span>Bar associations <span class="cnt"></span></h2><div class="links"><a class="lk item" href="https://www.floridabar.org/" target="_blank" rel="noopener" data-k="florida bar"><span class="lk-t">The Florida Bar</span><span class="lk-d">Rules and practice resources</span><span class="lk-h">floridabar.org</span></a><a class="lk item" href="https://www.jaxbar.org/" target="_blank" rel="noopener" data-k="JBA jax bar"><span class="lk-t">Jacksonville Bar Association</span><span class="lk-d">Duval voluntary bar</span><span class="lk-h">jaxbar.org</span></a><a class="lk item" href="https://dwperkinsbar.org/" target="_blank" rel="noopener" data-k="perkins bar"><span class="lk-t">D.W. Perkins Bar Association</span><span class="lk-d">Black attorneys of Jacksonville and NE Florida</span><span class="lk-h">dwperkinsbar.org</span></a><a class="lk item" href="https://claycountybarassociation.org/" target="_blank" rel="noopener" data-k="clay bar"><span class="lk-t">Clay County Bar Association</span><span class="lk-d">Clay voluntary bar</span><span class="lk-h">claycountybarassociation.org</span></a><a class="lk item" href="https://www.floridabar.org/about/volbars/vbprofile/?comm=VB178" target="_blank" rel="noopener" data-k="asian american bar"><span class="lk-t">Jacksonville Asian American Bar</span><span class="lk-d">Voluntary bar profile, Florida Bar</span><span class="lk-h">floridabar.org</span></a><a class="lk item" href="https://www.barassociationdirectory.com/fl/nassau-county-bar-association/" target="_blank" rel="noopener" data-k="nassau bar"><span class="lk-t">Nassau County Bar Association</span><span class="lk-d">Nassau voluntary bar</span><span class="lk-h">barassociationdirectory.com</span></a><a class="lk item" href="https://www.americanbar.org/" target="_blank" rel="noopener" data-k="ABA"><span class="lk-t">American Bar Association</span><span class="lk-d">National bar, sections, CLE</span><span class="lk-h">americanbar.org</span></a></div></section>
-<section class="dir fsec" id="schools" aria-labelledby="h-schools"><h2 id="h-schools"><span class="h-ic" aria-hidden="true">○</span>Law schools <span class="cnt"></span></h2><div class="links"><a class="lk item" href="https://www.ju.edu/law/" target="_blank" rel="noopener" data-k="jacksonville university"><span class="lk-t">JU College of Law</span><span class="lk-d">Jacksonville University</span><span class="lk-h">ju.edu</span></a><a class="lk item" href="https://law.ufl.edu/" target="_blank" rel="noopener" data-k="uf florida"><span class="lk-t">UF Levin College of Law</span><span class="lk-d">Gainesville</span><span class="lk-h">law.ufl.edu</span></a><a class="lk item" href="https://law.fsu.edu/" target="_blank" rel="noopener" data-k="fsu"><span class="lk-t">FSU College of Law</span><span class="lk-d">Tallahassee</span><span class="lk-h">law.fsu.edu</span></a><a class="lk item" href="https://www.stetson.edu/law/" target="_blank" rel="noopener" data-k="stetson"><span class="lk-t">Stetson College of Law</span><span class="lk-d">Gulfport and Tampa</span><span class="lk-h">stetson.edu</span></a></div></section>
-<section class="dir fsec" id="community" aria-labelledby="h-community"><h2 id="h-community"><span class="h-ic" aria-hidden="true">○</span>Community &amp; news <span class="cnt"></span></h2><div class="links"><a class="lk item" href="https://www.jaxdailyrecord.com/" target="_blank" rel="noopener" data-k="daily record legal notices"><span class="lk-t">Jacksonville Daily Record</span><span class="lk-d">Legal and business news, new filings</span><span class="lk-h">jaxdailyrecord.com</span></a><a class="lk item" href="https://www.jacksonville.com/" target="_blank" rel="noopener" data-k="times union news"><span class="lk-t">Florida Times-Union</span><span class="lk-d">Jacksonville daily newspaper</span><span class="lk-h">jacksonville.com</span></a><a class="lk item" href="https://www.news4jax.com/" target="_blank" rel="noopener" data-k="news"><span class="lk-t">News4Jax (WJXT)</span><span class="lk-d">Local news</span><span class="lk-h">news4jax.com</span></a><a class="lk item" href="https://www.actionnewsjax.com/" target="_blank" rel="noopener" data-k="news"><span class="lk-t">Action News Jax</span><span class="lk-d">Local news</span><span class="lk-h">actionnewsjax.com</span></a><a class="lk item" href="https://www.firstcoastnews.com/" target="_blank" rel="noopener" data-k="news"><span class="lk-t">First Coast News</span><span class="lk-d">Local news</span><span class="lk-h">firstcoastnews.com</span></a><a class="lk item" href="http://www.fncflorida.org/" target="_blank" rel="noopener" data-k="supervised visitation exchange"><span class="lk-t">Family Nurturing Center</span><span class="lk-d">Supervised visitation, NE Florida</span><span class="lk-h">fncflorida.org</span></a></div></section>
-<section class="dir fsec" id="access" aria-labelledby="h-access"><h2 id="h-access"><span class="h-ic" aria-hidden="true">○</span>Accessibility <span class="cnt"></span></h2><div class="links"><a class="lk item" href="https://www.ada.gov/" target="_blank" rel="noopener" data-k="ada"><span class="lk-t">ADA.gov</span><span class="lk-d">U.S. DOJ ADA homepage</span><span class="lk-h">ada.gov</span></a><a class="lk item" href="https://www.access-board.gov/ict.html" target="_blank" rel="noopener" data-k="508"><span class="lk-t">Access Board: ICT</span><span class="lk-d">Section 508 standards</span><span class="lk-h">access-board.gov</span></a><a class="lk item" href="https://www.section508.gov/" target="_blank" rel="noopener" data-k="508"><span class="lk-t">Section508.gov</span><span class="lk-d">Federal accessibility guidance</span><span class="lk-h">section508.gov</span></a><a class="lk item" href="http://web.archive.org/web/20211217071151/https://www.floridabar.org/about/diversity/efile001/" target="_blank" rel="noopener" data-k="accessibility pdf"><span class="lk-t">FL Bar accessibility (archive)</span><span class="lk-d">Archived page on accessible e-filing</span><span class="lk-h">web.archive.org</span></a></div></section>
- </div>
-</main>
+  <section class="view" id="v-documents" data-view="documents" aria-labelledby="h-docs" hidden>
+   <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="#/">Home</a></li><li aria-current="page">Documents</li></ol></nav>
+   <div class="vh"><div><p class="eyebrow">Documents</p><h1 id="h-docs">Statutes, rules &amp; forms</h1><p>Read statutes in this app, search the law library, and open the official rules, forms and filing guides.</p></div></div>
+   <div class="tiles" style="margin:0 0 1rem">
+    <a class="tile" href="reader.html"><span class="ti"><svg class="i" aria-hidden="true"><use href="#i-documents"/></svg></span><b>Statute reader</b><span>U.S. Code &amp; Florida Statutes, in this app</span></a>
+    <a class="tile" href="catalog.html"><span class="ti"><svg class="i" aria-hidden="true"><use href="#i-documents"/></svg></span><b>Law library catalog</b><span>Duval County Law Library</span></a>
+    <a class="tile" href="https://www.floridabar.org/rules/ctproc/" target="_blank" rel="noopener"><span class="ti"><svg class="i" aria-hidden="true"><use href="#i-documents"/></svg></span><b>Florida court rules ↗</b><span>The Florida Bar rule books</span></a>
+    <a class="tile" href="#/deadlines"><span class="ti"><svg class="i" aria-hidden="true"><use href="#i-deadlines"/></svg></span><b>Rule 2.514 explained</b><span>How time is computed</span></a>
+   </div>
+   <div id="docgroups"></div>
+  </section>
+
+  <section class="view" id="v-links" data-view="links" aria-labelledby="h-links" hidden>
+   <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="#/">Home</a></li><li><a href="#/links">Court links</a></li><li aria-current="page" id="crumb-sec">All categories</li></ol></nav>
+   <div class="vh"><div><p class="eyebrow">Court links</p><h1 id="h-links">Verified directory</h1><p>Clerks, courts, justice partners, bars, research and community resources for Northeast Florida.</p></div></div>
+   <div class="rlayout">
+    <aside class="facets" id="lfacets" aria-label="Categories">
+     <div class="fh"><b>Categories</b><button class="btn sm done" type="button" data-close="lfacets">Done</button></div>
+     <ul class="flist" id="lsecs"></ul>
+    </aside>
+    <div class="stack" style="gap:.2rem">
+     <div class="rbar">
+      <label for="lfilter" class="sr">Filter within court links</label>
+      <input id="lfilter" class="fi" type="search" placeholder="Filter within court links" autocomplete="off" style="flex:1 1 200px;width:auto;min-height:2.5rem;font-size:.95rem">
+      <button class="btn sm fbtn" type="button" id="lfopen"><svg class="i" aria-hidden="true"><use href="#i-filter"/></svg>Categories</button>
+     </div>
+     <p class="rcount" id="lcount" style="font-size:.85rem;color:var(--sub);margin:.1rem 0 .6rem"></p>
+     <div id="lgroups"></div>
+    </div>
+   </div>
+  </section>
+
+  <section class="view" id="v-saved" data-view="saved" aria-labelledby="h-sv" hidden>
+   <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="#/">Home</a></li><li aria-current="page">Saved &amp; folders</li></ol></nav>
+   <div class="vh"><div><p class="eyebrow">Saved</p><h1 id="h-sv">Saved &amp; folders</h1><p>Stored only in this browser. Tap a saved item to copy it and open CORE. Export to move everything to another device.</p></div><button class="btn sm fbtn" type="button" id="sfopen"><svg class="i" aria-hidden="true"><use href="#i-filter"/></svg>Folders</button></div>
+   <div class="rlayout" id="searches">
+    <aside class="facets" id="sfacets" aria-label="Folders">
+     <div class="fh"><b>Folders</b><button class="btn sm done" type="button" data-close="sfacets">Done</button></div>
+     <ul class="flist" id="folders"></ul>
+    </aside>
+    <div class="stack">
+     <section class="panel" aria-labelledby="h-list">
+      <div class="ph"><h2 id="h-list">Saved searches &amp; notes</h2><span class="more" id="list-n" style="color:var(--mute)"></span></div>
+      <ul class="saved" id="list" aria-label="Saved searches"></ul>
+     </section>
+     <section class="panel" aria-labelledby="h-add">
+      <div class="ph"><svg class="i" aria-hidden="true"><use href="#i-saved"/></svg><h2 id="h-add">Save a name or case number</h2></div>
+      <div class="pb">
+       <div class="f">
+        <div><label for="q">Name or case number</label><input id="q" type="text" autocomplete="off" placeholder="Smith, John or 16-2026-CA-001234"></div>
+        <div><label for="qn">Note (optional)</label><input id="qn" type="text" autocomplete="off" placeholder="Client, hearing date, division…"></div>
+        <div class="full"><label for="qf">Folder (optional)</label><input id="qf" type="text" autocomplete="off" list="folderlist" placeholder="e.g. Smith v. Jones, Hearings this week"><datalist id="folderlist"></datalist></div>
+       </div>
+       <div class="acts" style="margin-top:.7rem">
+        <button class="btn sm pri" id="add" type="button">Save</button>
+        <button class="btn sm" id="exp" type="button">Export JSON</button>
+        <button class="btn sm" id="impb" type="button">Import JSON</button>
+        <input id="imp" type="file" accept="application/json,.json" class="hidden" aria-label="Import saved searches JSON file">
+       </div>
+       <p class="fine">Keep client-confidential details out of shared or public computers.</p>
+      </div>
+     </section>
+     <section class="panel" id="starpanel" aria-labelledby="h-star">
+      <div class="ph"><svg class="i" aria-hidden="true"><use href="#i-star"/></svg><h2 id="h-star">Starred links</h2><span class="more" id="star-n" style="color:var(--mute)"></span></div>
+      <ul class="results" id="starred" style="border:0;box-shadow:none;border-radius:0 0 .5rem .5rem"></ul>
+     </section>
+    </div>
+   </div>
+  </section>
+
+  <section class="view" id="v-history" data-view="history" aria-labelledby="h-hist" hidden>
+   <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="#/">Home</a></li><li aria-current="page">History</li></ol></nav>
+   <div class="vh"><div><p class="eyebrow">History</p><h1 id="h-hist">Research history</h1><p>Your recent searches, decoded case numbers and computed deadlines, kept only on this device.</p></div><button class="btn sm" type="button" id="hclear">Clear history</button></div>
+   <section class="panel"><ul class="plain" id="hist"></ul></section>
+  </section>
+
+ </main>
+</div>
+
+<nav class="botnav" id="botnav" aria-label="Main (mobile)">
+ <a href="#/" data-nav="search"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><span>Search</span></a>
+ <a href="#/cases" data-nav="cases"><svg class="i" aria-hidden="true"><use href="#i-cases"/></svg><span>Cases</span></a>
+ <a href="#/deadlines" data-nav="deadlines"><svg class="i" aria-hidden="true"><use href="#i-deadlines"/></svg><span>Deadlines</span></a>
+ <a href="#/saved" data-nav="saved"><svg class="i" aria-hidden="true"><use href="#i-saved"/></svg><span>Saved</span></a>
+ <button type="button" id="morebtn" aria-controls="rail" aria-expanded="false"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg><span>More</span></button>
+</nav>
+<div class="scrim" id="scrim" hidden></div>
 
 <footer>
  <p><strong>Not affiliated with the Duval County Clerk of Courts. Not legal advice.</strong> An independent launcher for official sites; always confirm on the official source.</p>
@@ -255,7 +528,6 @@ footer strong{color:var(--ink)}
  <p>Documents in court files are PDF/A and may contain embedded links; treat them with the same care as any website. Viewing permissions follow the Florida Supreme Court's access orders and Security Matrix. No tracking, no accounts, nothing leaves this device.</p>
 </footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
 <script>
 'use strict';
 const CORE='https://core.duvalclerk.com/CoreCms.aspx?mode=PublicAccess';
@@ -263,6 +535,8 @@ const HOL={"2026-01-01": "New Year's Day", "2026-01-19": "Martin Luther King, Jr
 const PRESETS=[{"id": "custom", "g": "", "l": "Custom period", "d": 20, "t": "event", "m": true, "c": ""}, {"id": "ans", "g": "Civil", "l": "Answer to complaint", "d": 20, "t": "service of process", "m": false, "c": "Fla. R. Civ. P. 1.140(a)(1)"}, {"id": "cc", "g": "Civil", "l": "Answer to counterclaim / crossclaim; reply", "d": 20, "t": "service of the pleading", "m": true, "c": "Fla. R. Civ. P. 1.140(a)(1)"}, {"id": "state", "g": "Civil", "l": "Answer by State / agency (non-\u00a7768.28)", "d": 40, "t": "service", "m": false, "c": "Fla. R. Civ. P. 1.140(a)(2)(A)"}, {"id": "rogs", "g": "Civil", "l": "Answers to interrogatories", "d": 30, "t": "service of interrogatories", "m": true, "c": "Fla. R. Civ. P. 1.340(a)(9)"}, {"id": "rfp", "g": "Civil", "l": "Response to request for production", "d": 30, "t": "service of request", "m": true, "c": "Fla. R. Civ. P. 1.350(b)(3)"}, {"id": "rfa", "g": "Civil", "l": "Response to requests for admission", "d": 30, "t": "service of requests", "m": true, "c": "Fla. R. Civ. P. 1.370(a)(6)"}, {"id": "msj", "g": "Civil", "l": "Response to motion for summary judgment", "d": 40, "t": "service of the motion", "m": true, "c": "Fla. R. Civ. P. 1.510(c)(5)"}, {"id": "pfs", "g": "Civil", "l": "Accept proposal for settlement", "d": 30, "t": "service of the proposal", "m": false, "c": "Fla. R. Civ. P. 1.442(f)(1) (rule 2.514(b) does not apply)"}, {"id": "reh", "g": "Civil", "l": "Motion for rehearing / new trial", "d": 15, "t": "filing of judgment or return of verdict", "m": false, "c": "Fla. R. Civ. P. 1.530(b) (cannot be extended, 1.090(b)(2))"}, {"id": "fees", "g": "Civil", "l": "Motion for costs / attorney\u2019s fees", "d": 30, "t": "filing of the judgment", "m": false, "c": "Fla. R. Civ. P. 1.525"}, {"id": "fam", "g": "Family", "l": "Response to petition", "d": 20, "t": "service of process", "m": false, "c": "Fla. Fam. L. R. P. 12.140(a)(1)"}, {"id": "famreh", "g": "Family", "l": "Motion for rehearing / new trial", "d": 15, "t": "filing of judgment", "m": false, "c": "Fla. Fam. L. R. P. 12.530(b)"}, {"id": "noa", "g": "Appeal", "l": "Notice of appeal", "d": 30, "t": "rendition of the order", "m": false, "c": "Fla. R. App. P. 9.110(b)"}, {"id": "xa", "g": "Appeal", "l": "Notice of cross-appeal", "d": 15, "t": "service of the notice of appeal", "m": true, "c": "Fla. R. App. P. 9.110(g) (or the appeal deadline, if later)"}, {"id": "ib", "g": "Appeal", "l": "Initial brief", "d": 70, "t": "filing of the notice of appeal", "m": false, "c": "Fla. R. App. P. 9.110(f)"}, {"id": "ab", "g": "Appeal", "l": "Answer brief / reply brief", "d": 30, "t": "service of the prior brief", "m": true, "c": "Fla. R. App. P. 9.210(g)"}, {"id": "areh", "g": "Appeal", "l": "Motion for rehearing (appellate)", "d": 15, "t": "the order or decision", "m": false, "c": "Fla. R. App. P. 9.330(a)(1)"}, {"id": "crnoa", "g": "Criminal", "l": "Notice of appeal (criminal)", "d": 30, "t": "rendition of the written sentencing order", "m": false, "c": "Fla. R. App. P. 9.140(b)(3)"}, {"id": "crnt", "g": "Criminal", "l": "Motion for new trial (noncapital)", "d": 10, "t": "rendition of the verdict", "m": false, "c": "Fla. R. Crim. P. 3.590(a)"}, {"id": "crdisc", "g": "Criminal", "l": "State\u2019s discovery exhibit", "d": 15, "t": "service of the notice of discovery", "m": true, "c": "Fla. R. Crim. P. 3.220(b)(1)"}];
 const CT={"CA": ["Circuit civil", "Circuit"], "CC": ["County civil", "County"], "SC": ["Small claims", "County"], "DR": ["Domestic relations / family (incl. injunctions, adoption)", "Circuit"], "CP": ["Probate", "Circuit"], "GA": ["Guardianship", "Circuit"], "MH": ["Mental health (Baker Act, substance abuse, risk protection)", "Circuit"], "CF": ["Felony", "Circuit"], "MM": ["Misdemeanor", "County"], "CT": ["Criminal traffic", "County"], "TR": ["Traffic infraction (civil)", "County"], "IN": ["Non-criminal infraction", "County"], "CO": ["County ordinance violation", "County"], "MO": ["Municipal ordinance violation", "County"], "CJ": ["Juvenile delinquency", "Circuit"], "DP": ["Juvenile dependency / truancy", "Circuit"], "AP": ["Appeal from county court (circuit appellate)", "Circuit"]};
 const COUNTIES=["Alachua", "Baker", "Bay", "Bradford", "Brevard", "Broward", "Calhoun", "Charlotte", "Citrus", "Clay", "Collier", "Columbia", "Miami-Dade", "DeSoto", "Dixie", "Duval", "Escambia", "Flagler", "Franklin", "Gadsden", "Gilchrist", "Glades", "Gulf", "Hamilton", "Hardee", "Hendry", "Hernando", "Highlands", "Hillsborough", "Holmes", "Indian River", "Jackson", "Jefferson", "Lafayette", "Lake", "Lee", "Leon", "Levy", "Liberty", "Madison", "Manatee", "Marion", "Martin", "Monroe", "Nassau", "Okaloosa", "Okeechobee", "Orange", "Osceola", "Palm Beach", "Pasco", "Pinellas", "Polk", "Putnam", "St. Johns", "St. Lucie", "Santa Rosa", "Sarasota", "Seminole", "Sumter", "Suwannee", "Taylor", "Union", "Volusia", "Wakulla", "Walton", "Washington"];
+const SECS=[{"id": "clerk", "t": "Clerk of Courts · divisions", "ic": "§"}, {"id": "clerkservices", "t": "Clerk services & records", "ic": "§"}, {"id": "circuit", "t": "Fourth Judicial Circuit (courts)", "ic": "⚖"}, {"id": "selfhelp", "t": "Self-help & forms", "ic": "⚖"}, {"id": "filing", "t": "Filing & attorney tools", "ic": "◆"}, {"id": "federal", "t": "Federal courts", "ic": "★"}, {"id": "records", "t": "Justice partners & public records", "ic": "●"}, {"id": "research", "t": "Law & research", "ic": "¶"}, {"id": "clerks", "t": "Other clerks", "ic": "⚖"}, {"id": "bars", "t": "Bar associations", "ic": "○"}, {"id": "schools", "t": "Law schools", "ic": "○"}, {"id": "community", "t": "Community & news", "ic": "○"}, {"id": "access", "t": "Accessibility", "ic": "○"}];
+const LINKS=[{"s":"clerk","u":"https://www.duvalclerk.com/","t":"Clerk of Courts home","d":"duvalclerk.com, Jody Phillips, Clerk","h":"duvalclerk.com","k":"clerk main","ext":true},{"s":"clerk","u":"https://www.duvalclerk.com/departments/civil-court-services/circuit-civil","t":"Circuit Civil","d":"CA cases, claims over the county court limit","h":"duvalclerk.com","k":"CA circuit civil","ext":true},{"s":"clerk","u":"https://www.duvalclerk.com/departments/civil-court-services/county-civil","t":"County Civil & evictions","d":"CC cases, landlord/tenant","h":"duvalclerk.com","k":"CC county civil eviction landlord tenant","ext":true},{"s":"clerk","u":"https://www.duvalclerk.com/departments/civil-court-services/small-claims","t":"Small Claims","d":"SC cases, small claims packet & filing","h":"duvalclerk.com","k":"SC small claims","ext":true},{"s":"clerk","u":"https://www.duvalclerk.com/departments/civil-court-services/family-law","t":"Family Law","d":"DR cases: divorce, custody, support","h":"duvalclerk.com","k":"DR divorce dissolution custody paternity","ext":true},{"s":"clerk","u":"https://www.duvalclerk.com/departments/civil-court-services/domestic-violence","t":"Domestic Violence","d":"Injunctions for protection","h":"duvalclerk.com","k":"DR injunction protection order","ext":true},{"s":"clerk","u":"https://www.duvalclerk.com/departments/civil-court-services/probate","t":"Probate & Guardianship","d":"CP / GA cases","h":"duvalclerk.com","k":"CP GA probate estate will guardianship","ext":true},{"s":"clerk","u":"https://www.duvalclerk.com/departments/civil-court-services/mental-health","t":"Mental Health","d":"MH: Baker Act, Marchman Act, petitions","h":"duvalclerk.com","k":"MH baker marchman","ext":true},{"s":"clerk","u":"https://www.duvalclerk.com/departments/civil-court-services/foreclosure","t":"Foreclosure","d":"Mortgage foreclosure filings","h":"duvalclerk.com","k":"foreclosure mortgage","ext":true},{"s":"clerk","u":"https://www.duvalclerk.com/departments/criminal-court-services/felony","t":"Felony","d":"CF cases","h":"duvalclerk.com","k":"CF felony criminal","ext":true},{"s":"clerk","u":"https://www.duvalclerk.com/departments/criminal-court-services/misdemeanor","t":"Misdemeanor","d":"MM cases","h":"duvalclerk.com","k":"MM misdemeanor criminal","ext":true},{"s":"clerk","u":"https://www.duvalclerk.com/departments/criminal-court-services/traffic","t":"Traffic","d":"TR / CT citations and cases","h":"duvalclerk.com","k":"TR CT traffic citation ticket","ext":true},{"s":"clerk","u":"https://www.duvalclerk.com/departments/criminal-court-services/juvenile","t":"Juvenile","d":"CJ / DP cases","h":"duvalclerk.com","k":"CJ DP juvenile delinquency dependency","ext":true},{"s":"clerk","u":"https://www.duvalclerk.com/departments/criminal-court-services/appeals","t":"Appeals","d":"County-to-circuit appeals (AP)","h":"duvalclerk.com","k":"AP appeal","ext":true},{"s":"clerk","u":"https://www.duvalclerk.com/departments/beaches-branch","t":"Beaches Branch","d":"1543 Atlantic Blvd, Neptune Beach","h":"duvalclerk.com","k":"beaches neptune branch","ext":true},{"s":"clerkservices","u":"https://or.duvalclerk.com/","t":"Official Records search","d":"Deeds, mortgages, liens, judgments recorded in Duval","h":"or.duvalclerk.com","k":"official records deed mortgage lien recording search","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/departments/county-services/official-records-and-research","t":"Official Records & research","d":"Recording, certified copies, research requests","h":"duvalclerk.com","k":"official records certified copies","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/online-option/efiling-information","t":"eFiling information","d":"How e-filing works with the Clerk","h":"duvalclerk.com","k":"efile e-filing","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/about/fee-schedules","t":"Fee schedules","d":"The Clerk's official fee schedule by division","h":"duvalclerk.com","k":"fees cost filing fee schedule","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/about/registry-fee-calculator","t":"Registry fee calculator","d":"Official Clerk calculator for registry deposits","h":"duvalclerk.com","k":"registry fee calculator deposit","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/how-do-i/make-payments/purchase-certified-copies","t":"Purchase certified copies","d":"Order certified court documents","h":"duvalclerk.com","k":"certified copies","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/how-do-i/file/public-records-request","t":"Public records request","d":"Request records from the Clerk","h":"duvalclerk.com","k":"public records request chapter 119","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/online-option/e-notify","t":"E-Notify","d":"Case event notifications from the Clerk","h":"duvalclerk.com","k":"notify alerts","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/redirects/epay","t":"ePay","d":"Pay criminal and traffic balances","h":"duvalclerk.com","k":"pay payment fines","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/how-do-i/complete-forms/civil-forms","t":"Civil forms","d":"Clerk civil forms","h":"duvalclerk.com","k":"forms civil","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/how-do-i/complete-forms/family-forms","t":"Family forms","d":"Clerk family forms","h":"duvalclerk.com","k":"forms family divorce","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/how-do-i/complete-forms/criminal-department-forms","t":"Criminal department forms","d":"Clerk criminal forms","h":"duvalclerk.com","k":"forms criminal","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/how-do-i/complete-forms/expunge-or-seal-forms","t":"Seal or expunge forms","d":"Record sealing and expunction","h":"duvalclerk.com","k":"seal expunge expunction","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/services/orders-determining-confidentiality","t":"Orders determining confidentiality","d":"Confidentiality orders posted by the Clerk","h":"duvalclerk.com","k":"confidential 2.420","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/services/pre-trial-release-register","t":"Pre-trial release register","d":"Pretrial release register","h":"duvalclerk.com","k":"pretrial release bond","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/services/adminorders","t":"Clerk administrative orders","d":"Orders posted by the Clerk","h":"duvalclerk.com","k":"administrative orders","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/departments/jury-service","t":"Jury service","d":"Juror information and summons","h":"duvalclerk.com","k":"jury juror summons","ext":true},{"s":"clerkservices","u":"https://www.duval.realforeclose.com/","t":"Foreclosure sales","d":"Online foreclosure auctions","h":"duval.realforeclose.com","k":"foreclosure sale auction","ext":true},{"s":"clerkservices","u":"https://www.duval.realtaxdeed.com/","t":"Tax deed sales","d":"Online tax deed auctions","h":"duval.realtaxdeed.com","k":"tax deed auction","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/about/clerk-holiday-schedule","t":"Clerk holiday schedule","d":"Office closings 2026–2027","h":"duvalclerk.com","k":"holiday closed closing","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/about/office-locations","t":"Office locations","d":"Courthouse and Beaches branch","h":"duvalclerk.com","k":"address location courthouse","ext":true},{"s":"clerkservices","u":"https://www.duvalclerk.com/contact-us","t":"Contact the Clerk","d":"Phone directory and contact form","h":"duvalclerk.com","k":"contact phone","ext":true},{"s":"circuit","u":"https://www.jud4.org/","t":"4th Judicial Circuit","d":"Duval, Clay and Nassau courts","h":"jud4.org","k":"jud4 circuit court","ext":true},{"s":"circuit","u":"https://www.jud4.org/circuit-and-county-judges-of-the-fourth-judicial-circuit","t":"Judges & divisions","d":"Circuit and county judges of the 4th Circuit","h":"jud4.org","k":"judge division JA judicial assistant","ext":true},{"s":"circuit","u":"https://www.jud4.org/ex-parte-dates-judge-s-procedures/duval-judges","t":"Duval judges: ex parte & procedures","d":"Each judge's ex parte dates and procedures","h":"jud4.org","k":"judge procedures ex parte hearing JA","ext":true},{"s":"circuit","u":"https://www.jud4.org/duval-county-judges-biographies","t":"Duval judges: biographies","d":"Judge bios","h":"jud4.org","k":"judge biography","ext":true},{"s":"circuit","u":"https://www.jud4.org/administrative-orders","t":"Administrative orders","d":"4th Circuit administrative orders","h":"jud4.org","k":"administrative orders AO","ext":true},{"s":"circuit","u":"https://www.jud4.org/court-administration/civil-case-management","t":"Civil case management","d":"Case management orders and procedures","h":"jud4.org","k":"case management order CMO 1.200","ext":true},{"s":"circuit","u":"https://www.jud4.org/proposed-orders-efiling","t":"Proposed orders e-filing","d":"How to submit proposed orders","h":"jud4.org","k":"proposed order","ext":true},{"s":"circuit","u":"https://www.jud4.org/foreclosure-division","t":"Foreclosure division","d":"Foreclosure judges and procedures","h":"jud4.org","k":"foreclosure","ext":true},{"s":"circuit","u":"https://www.jud4.org/court-administration/magistrates-and-hearing-officers","t":"Magistrates & hearing officers","d":"General magistrates, hearing officers","h":"jud4.org","k":"magistrate hearing officer","ext":true},{"s":"circuit","u":"https://www.jud4.org/court-administration/felony-plea-forms","t":"Felony plea forms","d":"Plea forms used in the circuit","h":"jud4.org","k":"plea forms felony","ext":true},{"s":"circuit","u":"https://www.jud4.org/court-holiday-schedule","t":"Court holiday schedule","d":"Holidays observed by the courts","h":"jud4.org","k":"holiday","ext":true},{"s":"circuit","u":"https://www.jud4.org/courthouse-locations","t":"Courthouse locations","d":"Duval, Clay and Nassau courthouses","h":"jud4.org","k":"address courthouse location","ext":true},{"s":"circuit","u":"https://www.jud4.org/ada","t":"ADA accommodations","d":"Request an accommodation","h":"jud4.org","k":"ada disability accommodation","ext":true},{"s":"circuit","u":"https://www.jud4.org/court-interpreters","t":"Court interpreters","d":"Request an interpreter","h":"jud4.org","k":"interpreter spanish creole","ext":true},{"s":"selfhelp","u":"https://www.jud4.org/self-help","t":"Self-help center","d":"Getting started as a pro se litigant","h":"jud4.org","k":"self help pro se","ext":true},{"s":"selfhelp","u":"https://www.jud4.org/family-court-services/self-help","t":"Family Court Services","d":"Self-help for family cases","h":"jud4.org","k":"family self help","ext":true},{"s":"selfhelp","u":"https://www.jud4.org/court-programs/small-claims-clinics","t":"Small claims clinics","d":"Free clinics, 4th Circuit","h":"jud4.org","k":"small claims clinic","ext":true},{"s":"selfhelp","u":"https://www.duvalclerk.com/getmedia/c0682bbc-5153-49bf-b435-e0ca791255ca/SmallClaimsPacket_20200101_ADA_Compliant.pdf","t":"Small claims packet","d":"The Clerk's filing packet (PDF)","h":"duvalclerk.com","k":"small claims packet pdf","ext":true},{"s":"selfhelp","u":"https://www.flcourts.gov/Services/family-courts/domestic-relations-court-resources/family-law-forms","t":"Florida family law forms","d":"Supreme Court approved forms","h":"flcourts.gov","k":"family law forms 12.9","ext":true},{"s":"selfhelp","u":"https://www.flcourts.gov/Services/family-courts/self-help-information","t":"Florida self-help information","d":"Statewide self-help, Florida Courts","h":"flcourts.gov","k":"self help","ext":true},{"s":"selfhelp","u":"https://www.jaxlegalaid.org/","t":"Jacksonville Area Legal Aid","d":"Free civil legal help","h":"jaxlegalaid.org","k":"legal aid JALA pro bono","ext":true},{"s":"selfhelp","u":"https://www.jud4.org/duval-county-law-library","t":"Duval County Law Library","d":"Hours and services, 4th Circuit","h":"jud4.org","k":"law library","ext":true},{"s":"filing","u":"https://www.myflcourtaccess.com/","t":"Florida Courts E-Filing Portal","d":"File documents in Florida state courts","h":"myflcourtaccess.com","k":"efile e-filing portal","ext":true},{"s":"filing","u":"https://www.floridabar.org/directories/find-mbr/","t":"Florida Bar member search","d":"Find a lawyer, check bar status","h":"floridabar.org","k":"bar number attorney lookup","ext":true},{"s":"filing","u":"https://www.floridabar.org/rules/ctproc/","t":"Florida court rules (official)","d":"Current rules PDFs from The Florida Bar","h":"floridabar.org","k":"rules civil criminal appellate family probate 2.514","ext":true},{"s":"filing","u":"https://supremecourt.flcourts.gov/","t":"Florida Supreme Court","d":"Opinions, dockets, administrative orders","h":"supremecourt.flcourts.gov","k":"supreme court","ext":true},{"s":"filing","u":"https://1dca.flcourts.gov/","t":"First District Court of Appeal","d":"Appeals from Duval go here","h":"1dca.flcourts.gov","k":"1DCA appeal district court","ext":true},{"s":"filing","u":"https://www.flcourts.gov/","t":"Florida Courts","d":"State court system","h":"flcourts.gov","k":"flcourts","ext":true},{"s":"filing","u":"https://www.flcourts.gov/Services/information-technology/oit-resources/Court-Access","t":"Court records access (OIT)","d":"Florida Courts access standards","h":"flcourts.gov","k":"access matrix","ext":true},{"s":"federal","u":"https://pacer.uscourts.gov/","t":"PACER","d":"Federal court records","h":"pacer.uscourts.gov","k":"pacer federal records","ext":true},{"s":"federal","u":"https://www.flmd.uscourts.gov/locations/jacksonville","t":"M.D. Fla. — Jacksonville Division","d":"U.S. District Court, Jacksonville","h":"flmd.uscourts.gov","k":"federal district court jacksonville","ext":true},{"s":"federal","u":"https://www.flmd.uscourts.gov/","t":"U.S. District Court, M.D. Fla.","d":"Middle District of Florida","h":"flmd.uscourts.gov","k":"federal district court","ext":true},{"s":"federal","u":"https://ecf.flmd.uscourts.gov/","t":"CM/ECF — M.D. Fla.","d":"Federal e-filing for the district","h":"ecf.flmd.uscourts.gov","k":"ecf efile federal","ext":true},{"s":"federal","u":"https://www.flmb.uscourts.gov/","t":"Bankruptcy Court, M.D. Fla.","d":"U.S. Bankruptcy Court","h":"flmb.uscourts.gov","k":"bankruptcy","ext":true},{"s":"federal","u":"https://www.ca11.uscourts.gov/","t":"Eleventh Circuit","d":"U.S. Court of Appeals","h":"ca11.uscourts.gov","k":"11th circuit appeals","ext":true},{"s":"federal","u":"https://www.uscourts.gov/","t":"U.S. Courts","d":"Federal judiciary, forms and fees","h":"uscourts.gov","k":"federal","ext":true},{"s":"records","u":"https://sao4th.com/","t":"State Attorney, 4th Circuit","d":"Prosecution, Duval/Clay/Nassau","h":"sao4th.com","k":"SAO state attorney prosecutor","ext":true},{"s":"records","u":"https://www.pd4th.org/","t":"Public Defender, 4th Circuit","d":"Court-appointed defense","h":"pd4th.org","k":"PD public defender","ext":true},{"s":"records","u":"https://www.jaxsheriff.org/","t":"Jacksonville Sheriff's Office","d":"JSO","h":"jaxsheriff.org","k":"JSO sheriff police","ext":true},{"s":"records","u":"https://inmatesearch.jaxsheriff.org/","t":"JSO inmate search","d":"Duval jail inmate lookup","h":"inmatesearch.jaxsheriff.org","k":"jail inmate booking search","ext":true},{"s":"records","u":"https://pubapps.fdc.myflorida.com/OffenderSearch/search.aspx","t":"FDC offender search","d":"Florida Dept. of Corrections","h":"pubapps.fdc.myflorida.com","k":"prison DOC offender inmate","ext":true},{"s":"records","u":"https://offender.fdle.state.fl.us/offender/sops/home.jsf","t":"Sexual offender search","d":"FDLE registry","h":"offender.fdle.state.fl.us","k":"FDLE sex offender registry","ext":true},{"s":"records","u":"https://www.flhsmv.gov/","t":"FLHSMV","d":"Driver and vehicle records agency","h":"flhsmv.gov","k":"DHSMV DMV driver vehicle","ext":true},{"s":"records","u":"https://mydmvportal.flhsmv.gov/home/en/publicweb/dlcheck","t":"Driver license check","d":"FLHSMV license status check","h":"mydmvportal.flhsmv.gov","k":"driver license status suspended DHSMV","ext":true},{"s":"records","u":"https://www.flhsmv.gov/traffic-crash-reports/","t":"Crash reports","d":"FLHSMV traffic crash reports","h":"flhsmv.gov","k":"crash accident report","ext":true},{"s":"records","u":"https://search.sunbiz.org/Inquiry/CorporationSearch/ByName","t":"Sunbiz entity search","d":"Florida corporations and LLCs","h":"search.sunbiz.org","k":"sunbiz corporation LLC registered agent","ext":true},{"s":"records","u":"https://paopropertysearch.coj.net/Basic/Search.aspx","t":"Property Appraiser search","d":"Duval parcel and owner search","h":"paopropertysearch.coj.net","k":"property appraiser parcel owner PAO","ext":true},{"s":"records","u":"https://www.jacksonville.gov/departments/property-appraiser","t":"Property Appraiser","d":"Office of the Duval Property Appraiser","h":"jacksonville.gov","k":"property appraiser","ext":true},{"s":"records","u":"https://taxcollector.jacksonville.gov/","t":"Tax Collector","d":"Duval County Tax Collector","h":"taxcollector.jacksonville.gov","k":"tax collector","ext":true},{"s":"records","u":"https://www.jacksonville.gov/","t":"City of Jacksonville","d":"City government and services","h":"jacksonville.gov","k":"city COJ","ext":true},{"s":"records","u":"https://www.claysheriff.com/","t":"Clay County Sheriff's Office","d":"Clay County law enforcement","h":"claysheriff.com","k":"sheriff clay","ext":true},{"s":"records","u":"https://nassauso.com/","t":"Nassau County Sheriff's Office","d":"Nassau County law enforcement","h":"nassauso.com","k":"sheriff nassau","ext":true},{"s":"research","u":"reader.html","t":"Statute reader","d":"Read U.S. Code and Florida Statutes in this app","h":"in this app","k":"statute reader usc florida","ext":false},{"s":"research","u":"catalog.html","t":"Law library catalog","d":"Search the Duval County Law Library collection","h":"in this app","k":"catalog library","ext":false},{"s":"research","u":"https://www.leg.state.fl.us/statutes/","t":"Florida Statutes","d":"Official, Florida Legislature","h":"leg.state.fl.us","k":"statutes florida","ext":true},{"s":"research","u":"https://www.flsenate.gov/Laws/Statutes","t":"Florida Statutes (Senate)","d":"Current statutes, Florida Senate","h":"flsenate.gov","k":"statutes florida senate","ext":true},{"s":"research","u":"https://flrules.org/","t":"Florida Administrative Code","d":"State agency rules","h":"flrules.org","k":"FAC administrative code","ext":true},{"s":"research","u":"https://uscode.house.gov/","t":"U.S. Code","d":"Official, Office of the Law Revision Counsel","h":"uscode.house.gov","k":"USC federal statutes","ext":true},{"s":"research","u":"https://www.ecfr.gov/","t":"Code of Federal Regulations","d":"eCFR, updated daily","h":"ecfr.gov","k":"CFR regulations","ext":true},{"s":"research","u":"https://www.supremecourt.gov/","t":"U.S. Supreme Court","d":"Opinions, dockets, calendar","h":"supremecourt.gov","k":"SCOTUS","ext":true},{"s":"research","u":"https://www.law.cornell.edu/supremecourt/text","t":"Supreme Court collection","d":"Cornell LII","h":"law.cornell.edu","k":"cornell LII","ext":true},{"s":"research","u":"https://www.courtlistener.com/","t":"CourtListener","d":"Free opinions and dockets","h":"courtlistener.com","k":"case law opinions RECAP","ext":true},{"s":"research","u":"https://www.justia.com/","t":"Justia","d":"Free case law and codes","h":"justia.com","k":"case law","ext":true},{"s":"research","u":"https://www.ca11.uscourts.gov/eleventh-circuit-library","t":"11th Circuit library","d":"Research links","h":"ca11.uscourts.gov","k":"library","ext":true},{"s":"research","u":"https://www.loc.gov/research-centers/law-library-of-congress/about-this-research-center/","t":"Law Library of Congress","d":"Research guides","h":"loc.gov","k":"library of congress","ext":true},{"s":"research","u":"https://www.copyright.gov/","t":"U.S. Copyright Office","d":"Copyright law and records","h":"copyright.gov","k":"copyright","ext":true},{"s":"research","u":"https://www.ncsc.org/","t":"NCSC","d":"National Center for State Courts","h":"ncsc.org","k":"state courts","ext":true},{"s":"clerks","u":"https://clayclerk.com/","t":"Clay County Clerk","d":"Clerk of Court, Clay County (4th Circuit)","h":"clayclerk.com","k":"clay clerk","ext":true},{"s":"clerks","u":"https://www.nassauclerk.com/","t":"Nassau County Clerk","d":"Clerk of Court, Nassau County (4th Circuit)","h":"nassauclerk.com","k":"nassau clerk","ext":true},{"s":"clerks","u":"https://www.miamidadeclerk.gov/","t":"Miami-Dade Clerk","d":"Clerk of the Court and Comptroller","h":"miamidadeclerk.gov","k":"miami dade clerk","ext":true},{"s":"clerks","u":"https://www2.miamidadeclerk.gov/QOS/","t":"Miami-Dade case search","d":"Universal case search","h":"www2.miamidadeclerk.gov","k":"miami dade search","ext":true},{"s":"bars","u":"https://www.floridabar.org/","t":"The Florida Bar","d":"Rules and practice resources","h":"floridabar.org","k":"florida bar","ext":true},{"s":"bars","u":"https://www.jaxbar.org/","t":"Jacksonville Bar Association","d":"Duval voluntary bar","h":"jaxbar.org","k":"JBA jax bar","ext":true},{"s":"bars","u":"https://dwperkinsbar.org/","t":"D.W. Perkins Bar Association","d":"Black attorneys of Jacksonville and NE Florida","h":"dwperkinsbar.org","k":"perkins bar","ext":true},{"s":"bars","u":"https://claycountybarassociation.org/","t":"Clay County Bar Association","d":"Clay voluntary bar","h":"claycountybarassociation.org","k":"clay bar","ext":true},{"s":"bars","u":"https://www.floridabar.org/about/volbars/vbprofile/?comm=VB178","t":"Jacksonville Asian American Bar","d":"Voluntary bar profile, Florida Bar","h":"floridabar.org","k":"asian american bar","ext":true},{"s":"bars","u":"https://www.barassociationdirectory.com/fl/nassau-county-bar-association/","t":"Nassau County Bar Association","d":"Nassau voluntary bar","h":"barassociationdirectory.com","k":"nassau bar","ext":true},{"s":"bars","u":"https://www.americanbar.org/","t":"American Bar Association","d":"National bar, sections, CLE","h":"americanbar.org","k":"ABA","ext":true},{"s":"schools","u":"https://www.ju.edu/law/","t":"JU College of Law","d":"Jacksonville University","h":"ju.edu","k":"jacksonville university","ext":true},{"s":"schools","u":"https://law.ufl.edu/","t":"UF Levin College of Law","d":"Gainesville","h":"law.ufl.edu","k":"uf florida","ext":true},{"s":"schools","u":"https://law.fsu.edu/","t":"FSU College of Law","d":"Tallahassee","h":"law.fsu.edu","k":"fsu","ext":true},{"s":"schools","u":"https://www.stetson.edu/law/","t":"Stetson College of Law","d":"Gulfport and Tampa","h":"stetson.edu","k":"stetson","ext":true},{"s":"community","u":"https://www.jaxdailyrecord.com/","t":"Jacksonville Daily Record","d":"Legal and business news, new filings","h":"jaxdailyrecord.com","k":"daily record legal notices","ext":true},{"s":"community","u":"https://www.jacksonville.com/","t":"Florida Times-Union","d":"Jacksonville daily newspaper","h":"jacksonville.com","k":"times union news","ext":true},{"s":"community","u":"https://www.news4jax.com/","t":"News4Jax (WJXT)","d":"Local news","h":"news4jax.com","k":"news","ext":true},{"s":"community","u":"https://www.actionnewsjax.com/","t":"Action News Jax","d":"Local news","h":"actionnewsjax.com","k":"news","ext":true},{"s":"community","u":"https://www.firstcoastnews.com/","t":"First Coast News","d":"Local news","h":"firstcoastnews.com","k":"news","ext":true},{"s":"community","u":"http://www.fncflorida.org/","t":"Family Nurturing Center","d":"Supervised visitation, NE Florida","h":"fncflorida.org","k":"supervised visitation exchange","ext":true},{"s":"access","u":"https://www.ada.gov/","t":"ADA.gov","d":"U.S. DOJ ADA homepage","h":"ada.gov","k":"ada","ext":true},{"s":"access","u":"https://www.access-board.gov/ict.html","t":"Access Board: ICT","d":"Section 508 standards","h":"access-board.gov","k":"508","ext":true},{"s":"access","u":"https://www.section508.gov/","t":"Section508.gov","d":"Federal accessibility guidance","h":"section508.gov","k":"508","ext":true},{"s":"access","u":"http://web.archive.org/web/20211217071151/https://www.floridabar.org/about/diversity/efile001/","t":"FL Bar accessibility (archive)","d":"Archived page on accessible e-filing","h":"web.archive.org","k":"accessibility pdf","ext":true}];
 const $=id=>document.getElementById(id);
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2000);}
 function copy(text,msg){
@@ -274,7 +548,7 @@ function copy(text,msg){
 /* theme */
 $('theme').addEventListener('click',()=>{const r=document.documentElement;const cur=r.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');const n=cur==='dark'?'light':'dark';r.dataset.theme=n;try{localStorage.setItem('duval-theme',n);}catch(e){}});
 if(!document.documentElement.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.dataset.theme='dark';
-
+/* ---------- dates ---------- */
 /* ---------- dates ---------- */
 const DOW=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -310,23 +584,29 @@ function compute(trig,n,dir,mail){
   if(!covered(trig)||!covered(end))warn.push('Holiday table covers 2026–2027 only; outside it only weekends are applied.');
   return {end,steps,warn};
 }
-let last=null;
+
+/* ---------- deadline UI ---------- */
+let last=null,dlTouched=false,dlLogT=null;
 function preset(){return PRESETS.find(p=>p.id===$('preset').value)||PRESETS[0];}
 function onPreset(){const p=preset();if(p.id!=='custom'){$('days').value=p.d;$('dir').value='after';}$('trigl').textContent=p.t;
   $('mail').disabled=!p.m;if(!p.m)$('mail').checked=false;$('mail').parentElement.style.opacity=p.m?1:.55;recalc();}
 function recalc(){
   const out=$('dlout'),p=preset(),t=parseD($('trig').value),n=parseInt($('days').value,10),dir=$('dir').value;
-  if(!t||!(n>0)){out.innerHTML='<div class="big">Pick a trigger date</div>';last=null;return;}
-  const r=compute(t,n,dir,$('mail').checked&&p.m);
+  if(!t||!(n>0)){out.innerHTML='<div class="placeholder">Pick a trigger date</div>';last=null;return;}
+  const mail=$('mail').checked&&p.m;
+  const r=compute(t,n,dir,mail);
   last={p,t,n,dir,r};
   const label=p.id==='custom'?(n+' days '+dir+' '+fmt(t)):p.l;
-  out.innerHTML='<div class="cite">'+esc(label)+(p.c?' · '+esc(p.c):'')+'</div><div class="big">'+fmt(r.end)+'</div>'+
-    '<div class="cite">'+n+' days '+(dir==='before'?'before ':'after ')+esc(p.id==='custom'?'trigger':p.t)+' on '+fmt(t)+(dir!=='before'?' · e-filing closes 11:59:59 p.m. ET':'')+'</div>'+
-    r.warn.map(w=>'<div class="warn">'+esc(w)+'</div>').join('')+'<ol>'+r.steps.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol>';
+  out.innerHTML='<div class="doc-meta"><b>Computed deadline</b>'+(p.g?'<span>'+esc(p.g)+'</span>':'')+(p.c?'<span>'+esc(p.c)+'</span>':'')+'</div>'+
+    '<h2 class="dt">'+esc(label)+'</h2><div class="big">'+fmt(r.end)+'</div>'+
+    '<div class="cite">'+n+' days '+(dir==='before'?'before ':'after ')+esc(p.id==='custom'?'trigger':p.t)+' on '+fmt(t)+(mail?' · served only by mail':'')+(dir!=='before'?' · e-filing closes 11:59:59 p.m. ET':'')+'</div>'+
+    r.warn.map(w=>'<div class="warn" style="margin-top:.4rem">'+esc(w)+'</div>').join('')+
+    '<div class="rule"></div><div class="doc-meta"><b>Computation</b><span>Fla. R. Gen. Prac. &amp; Jud. Admin. 2.514</span></div><ol class="steps">'+r.steps.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol>';
+  if(dlTouched){clearTimeout(dlLogT);dlLogT=setTimeout(()=>logHist('dl',(p.id==='custom'?n+'-day deadline':p.l)+' → '+short(r.end),{p:p.id,t:iso(t),n,dir,m:mail?1:0}),1500);}
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-['preset'].forEach(i=>$(i).addEventListener('change',onPreset));
-['trig','days','dir','mail'].forEach(i=>{$(i).addEventListener('input',recalc);$(i).addEventListener('change',recalc);});
+$('preset').addEventListener('change',()=>{dlTouched=true;onPreset();});
+['trig','days','dir','mail'].forEach(i=>{const h=()=>{dlTouched=true;recalc();};$(i).addEventListener('input',h);$(i).addEventListener('change',h);});
 $('dlcopy').addEventListener('click',()=>{if(!last)return toast('Pick a trigger date first');const {p,t,n,r}=last;
   copy((p.id==='custom'?n+'-day deadline':p.l)+': '+fmt(r.end)+(p.c?' ('+p.c+')':'')+'\nTrigger: '+fmt(t)+'\n'+r.steps.join('\n')+'\nComputed under Fla. R. Gen. Prac. & Jud. Admin. 2.514; verify against the rules and docket.','Deadline copied');});
 $('dlics').addEventListener('click',()=>{if(!last)return toast('Pick a trigger date first');const {p,r,t}=last;
@@ -334,8 +614,12 @@ $('dlics').addEventListener('click',()=>{if(!last)return toast('Pick a trigger d
   const title=(p.id==='custom'?'Deadline':p.l)+' (due)';
   const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Duval Court Records//EN','BEGIN:VEVENT','UID:'+d+'-'+Math.random().toString(36).slice(2)+'@duval-court-records','DTSTAMP:'+now,'DTSTART;VALUE=DATE:'+d,'DTEND;VALUE=DATE:'+nx,'SUMMARY:'+title.replace(/[,;]/g,' '),'DESCRIPTION:'+((p.c||'')+' Trigger '+iso(t)+'. Verify against the rules.').replace(/[,;]/g,' '),'END:VEVENT','END:VCALENDAR'].join('\r\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));a.download='deadline-'+iso(r.end)+'.ics';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);});
-(function(){const n=new Date();$('trig').value=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');onPreset();})();
+$('dlprint').addEventListener('click',()=>{if(!last)return toast('Pick a trigger date first');window.print();});
+function todayIso(){const n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}
+$('trig').value=todayIso();onPreset();
+function loadDeadline(o){if(!o)return;const p=PRESETS.find(x=>x.id===o.p);$('preset').value=p?p.id:'custom';onPreset();if(o.t)$('trig').value=o.t;if(o.n)$('days').value=o.n;if(o.dir)$('dir').value=o.dir;if(p&&p.m)$('mail').checked=!!o.m;recalc();}
 
+/* ---------- case number ---------- */
 /* ---------- case number ---------- */
 function decode(raw){
   const s=(raw||'').toUpperCase().replace(/[\s\u2013\u2014]/g,'-').replace(/[^A-Z0-9-]/g,'');
@@ -352,70 +636,278 @@ function decode(raw){
   out.full=out.std+(out.suffix?'-'+out.suffix:'');
   return out;
 }
-let lastCase=null;
-function showCase(){
-  const o=$('cnout'),d=decode($('cn').value);lastCase=null;
-  if(!d){o.innerHTML='<div class="cite">Decodes county, year, court type and sequence.</div>';return;}
-  if(d.err){o.innerHTML='<div class="warn">'+esc(d.err)+'</div>';return;}
-  lastCase=d;const t=CT[d.ty];const cn=COUNTIES[d.county-1];
-  o.innerHTML='<div class="big mono" style="font-size:1.2rem">'+esc(d.full)+'</div><dl class="dec">'+
+function caseHTML(d){const t=CT[d.ty];const cn=COUNTIES[d.county-1];
+  return '<div class="doc-meta"><b>Uniform case number</b>'+(t?'<span>'+esc(t[1])+' court</span>':'')+'<span>R. 2.245(b)</span></div><div class="case-no">'+esc(d.full)+'</div><dl class="dec">'+
    '<dt>County</dt><dd>'+String(d.county).padStart(2,'0')+' · '+(cn?esc(cn)+' County':'unknown code')+(d.coGiven?'':' (assumed)')+([10,16,45].includes(d.county)?' · 4th Circuit':'')+'</dd>'+
    '<dt>Year filed</dt><dd>'+d.yr+'</dd>'+
    '<dt>Court type</dt><dd><b>'+d.ty+'</b> · '+(t?esc(t[0])+' ('+t[1]+' court)':'<span class="warn">not a standard court type code</span>')+'</dd>'+
-   '<dt>Sequence</dt><dd>'+d.seq+'</dd>'+(d.suffix?'<dt>Suffix</dt><dd class="mono">'+esc(d.suffix)+' (as entered)</dd>':'')+'</dl>';
+   '<dt>Sequence</dt><dd>'+d.seq+'</dd>'+(d.suffix?'<dt>Suffix</dt><dd class="mono">'+esc(d.suffix)+' (as entered)</dd>':'')+'</dl>';}
+let lastCase=null,cnLogT=null;
+function showCase(){
+  const o=$('cnout'),d=decode($('cn').value);lastCase=null;
+  if(!d){o.innerHTML='<p class="cite">Decodes county, year, court type and sequence.</p>';return;}
+  if(d.err){o.innerHTML='<div class="warn">'+esc(d.err)+'</div>';return;}
+  lastCase=d;o.innerHTML=caseHTML(d);
+  if(CT[d.ty]){clearTimeout(cnLogT);cnLogT=setTimeout(()=>logHist('case',d.full,{ty:d.ty}),1800);}
 }
 $('cn').addEventListener('input',showCase);
 $('cncopy').addEventListener('click',()=>{if(!lastCase)return toast('Enter a case number first');copy(lastCase.full,'Copied '+lastCase.full+'. Paste it in CORE');});
 $('cnsave').addEventListener('click',()=>{if(!lastCase)return toast('Enter a case number first');addSaved(lastCase.full,(CT[lastCase.ty]||[''])[0]);});
 
-/* ---------- saved searches (localStorage) ---------- */
-const KEY='duval-searches';let saved=[];
-try{saved=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(saved))saved=[];}catch(e){saved=[];}
+/* ---------- storage helpers ---------- */
+function load(k,d){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v;}catch(e){return d;}}
+function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){toast('Could not save (storage full or blocked)');return false;}}
+function ago(at){const s=Math.round((Date.now()-at)/1000);if(s<60)return 'just now';if(s<3600)return Math.round(s/60)+' min ago';if(s<86400)return Math.round(s/3600)+' h ago';const d=new Date(at);return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});}
+function svg(n,c){return '<svg class="'+(c||'i')+'" aria-hidden="true"><use href="#i-'+n+'"/></svg>';}
+
+/* ---------- saved searches + folders (localStorage) ---------- */
+const KEY='duval-searches';let saved=load(KEY,[]);
+if(!Array.isArray(saved))saved=[];
 saved=saved.filter(x=>x&&typeof x.t==='string');
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(saved));}catch(e){toast('Could not save (storage full or blocked)');}}
+let curFolder='*';
+function persist(){store(KEY,saved);}
+function folderNames(){return [...new Set(saved.map(s=>(s.f||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));}
 function render(){
   const L=$('list');L.innerHTML='';
-  if(!saved.length){const p=document.createElement('p');p.className='empty';p.textContent='Nothing saved yet.';L.appendChild(p);return;}
-  saved.forEach((s,i)=>{
-    const li=document.createElement('li');li.className='sitem';li.dataset.k=(s.t+' '+(s.n||'')).toLowerCase();
+  const items=saved.map((s,i)=>[s,i]).filter(([s])=>curFolder==='*'||(curFolder===''?!(s.f||'').trim():(s.f||'').trim()===curFolder));
+  $('list-n').textContent=items.length+(curFolder==='*'?' total':' in '+(curFolder||'Unfiled'));
+  if(!items.length){const p=document.createElement('p');p.className='empty';p.textContent=saved.length?'Nothing in this folder.':'Nothing saved yet.';L.appendChild(p);}
+  items.forEach(([s,i])=>{
+    const li=document.createElement('li');li.className='sitem';li.dataset.k=(s.t+' '+(s.n||'')+' '+(s.f||'')).toLowerCase();
     const go=document.createElement('button');go.className='go';go.type='button';
     const b=document.createElement('b');b.textContent=s.t;go.appendChild(b);
-    const sp=document.createElement('span');sp.textContent=(s.n?s.n+' · ':'')+'saved '+new Date(s.at||Date.now()).toLocaleDateString();go.appendChild(sp);
+    const sp=document.createElement('span');
+    if((s.f||'').trim()){const tg=document.createElement('span');tg.className='tag';tg.textContent=s.f;sp.appendChild(tg);}
+    sp.appendChild(document.createTextNode((s.n?s.n+' · ':'')+'saved '+new Date(s.at||Date.now()).toLocaleDateString()));go.appendChild(sp);
     go.setAttribute('aria-label','Copy '+s.t+' and open CORE');
     go.addEventListener('click',()=>{copy(s.t,'Copied. Opening CORE');window.open(CORE,'_blank','noopener');});
     const del=document.createElement('button');del.className='del';del.type='button';del.textContent='\u2715';del.setAttribute('aria-label','Delete '+s.t);
     del.addEventListener('click',()=>{saved.splice(i,1);persist();render();toast('Deleted');});
     li.appendChild(go);li.appendChild(del);L.appendChild(li);
   });
+  renderFolders();counts();
 }
-function addSaved(t,n){t=(t||'').trim();if(!t)return toast('Type a name or case number first');
-  saved=saved.filter(x=>x.t.toLowerCase()!==t.toLowerCase());saved.unshift({t,n:(n||'').trim(),at:Date.now()});saved=saved.slice(0,200);persist();render();toast('Saved');}
-$('add').addEventListener('click',()=>{addSaved($('q').value,$('qn').value);$('q').value='';$('qn').value='';});
-['q','qn'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('add').click();}}));
-$('exp').addEventListener('click',()=>{const data=JSON.stringify({app:'duval-court-records',version:1,exported:new Date().toISOString(),searches:saved},null,2);
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='duval-saved-searches-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);toast('Exported '+saved.length);});
+function renderFolders(){
+  const F=$('folders'),names=folderNames(),unf=saved.filter(s=>!(s.f||'').trim()).length;
+  const rows=[['*','All saved',saved.length],['','Unfiled',unf]].concat(names.map(n=>[n,n,saved.filter(s=>(s.f||'').trim()===n).length]));
+  F.innerHTML=rows.map(([v,l,c])=>'<li><button type="button" data-f="'+esc(v)+'" aria-pressed="'+(curFolder===v)+'">'+svg(v==='*'?'saved':'documents')+'<span>'+esc(l)+'</span><span class="c">'+c+'</span></button></li>').join('')+
+    '<li><button type="button" data-f="\u2605" aria-pressed="false">'+svg('star')+'<span>Starred links</span><span class="c">'+starred.length+'</span></button></li>';
+  F.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.f;closeSheets();if(v==='\u2605'){$('starpanel').scrollIntoView({behavior:'smooth',block:'start'});return;}curFolder=v;render();}));
+  $('folderlist').innerHTML=names.map(n=>'<option value="'+esc(n)+'">').join('');
+}
+function addSaved(t,n,f){t=(t||'').trim();if(!t)return toast('Type a name or case number first');
+  if(f==null)f=(curFolder!=='*'&&curFolder!=='')?curFolder:'';
+  saved=saved.filter(x=>x.t.toLowerCase()!==t.toLowerCase());saved.unshift({t,n:(n||'').trim(),f:(f||'').trim().slice(0,80),at:Date.now()});saved=saved.slice(0,200);persist();render();toast('Saved');}
+$('add').addEventListener('click',()=>{addSaved($('q').value,$('qn').value,$('qf').value.trim()||null);$('q').value='';$('qn').value='';});
+['q','qn','qf'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('add').click();}}));
+$('exp').addEventListener('click',()=>{const data=JSON.stringify({app:'duval-court-records',version:2,exported:new Date().toISOString(),searches:saved,starred},null,2);
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='duval-saved-searches-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);toast('Exported '+saved.length+(starred.length?' + '+starred.length+' starred':''));});
 $('impb').addEventListener('click',()=>$('imp').click());
 $('imp').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);const arr=Array.isArray(j)?j:(j.searches||[]);let n=0;
-  arr.forEach(x=>{if(x&&typeof x.t==='string'&&x.t.trim()&&!saved.some(y=>y.t.toLowerCase()===x.t.trim().toLowerCase())){saved.push({t:x.t.trim().slice(0,300),n:String(x.n||'').slice(0,300),at:+x.at||Date.now()});n++;}});
-  saved.sort((a,b)=>(b.at||0)-(a.at||0));persist();render();toast('Imported '+n+' new');}catch(err){toast('That file is not a saved-searches export');}e.target.value='';};r.readAsText(f);});
-render();
+  arr.forEach(x=>{if(x&&typeof x.t==='string'&&x.t.trim()&&!saved.some(y=>y.t.toLowerCase()===x.t.trim().toLowerCase())){saved.push({t:x.t.trim().slice(0,300),n:String(x.n||'').slice(0,300),f:String(x.f||'').slice(0,80),at:+x.at||Date.now()});n++;}});
+  let s=0;if(j&&Array.isArray(j.starred))j.starred.forEach(u=>{if(typeof u==='string'&&LINKS.some(l=>l.u===u)&&!starred.includes(u)){starred.push(u);s++;}});
+  saved.sort((a,b)=>(b.at||0)-(a.at||0));persist();store(SKEY,starred);render();renderStarred();toast('Imported '+n+' new'+(s?' + '+s+' starred':''));}catch(err){toast('That file is not a saved-searches export');}e.target.value='';};r.readAsText(f);});
 
-/* ---------- global filter ---------- */
-const F=$('filter');
-document.querySelectorAll('.dir').forEach(s=>{s.querySelector('.cnt').textContent=s.querySelectorAll('.lk').length;});
-function norm(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
-function applyFilter(){
-  const q=norm(F.value.trim());const terms=q.split(/\s+/).filter(Boolean);let shown=0;
-  document.querySelectorAll('.lk').forEach(a=>{const hay=norm(a.textContent+' '+(a.dataset.k||'')+' '+a.href);const ok=terms.every(t=>hay.includes(t));a.classList.toggle('hidden',!ok);if(ok)shown++;});
-  document.querySelectorAll('.dir').forEach(s=>{const n=s.querySelectorAll('.lk:not(.hidden)').length;s.classList.toggle('hidden',n===0);s.querySelector('.cnt').textContent=n;});
-  document.querySelectorAll('main > .hero.item, .grid > .item').forEach(c=>{const hay=norm(c.dataset.k+' '+c.querySelector('h1,h2').textContent);const ok=!terms.length||terms.every(t=>hay.includes(t));c.classList.toggle('hidden',!ok);if(ok&&terms.length)shown++;});
-  $('nores').classList.toggle('hidden',!terms.length||shown>0);
-  $('fstatus').textContent=terms.length?(shown?shown+' match'+(shown===1?'':'es')+' for “'+F.value.trim()+'” · Esc to clear':'No matches'):'';
+/* ---------- starred links ---------- */
+const SKEY='duval-starred';let starred=load(SKEY,[]);if(!Array.isArray(starred))starred=[];starred=starred.filter(u=>typeof u==='string');
+function isStar(u){return starred.includes(u);}
+function toggleStar(u){const i=starred.indexOf(u);if(i>=0){starred.splice(i,1);toast('Removed from starred');}else{starred.unshift(u);toast('Starred');}store(SKEY,starred);
+  document.querySelectorAll('.star').forEach(b=>{if(b.dataset.u===u)b.setAttribute('aria-pressed',String(isStar(u)));});renderStarred();renderFolders();counts();}
+function renderStarred(){const S=$('starred');const items=starred.map(u=>LINKS.find(l=>l.u===u)).filter(Boolean);
+  $('star-n').textContent=items.length||'';
+  S.innerHTML=items.length?'':'<p class="empty">Tap the star on any court link to keep it here.</p>';
+  items.forEach((l,i)=>S.appendChild(resRow(linkItem(l),null,[])));}
+
+/* ---------- research history ---------- */
+const HKEY='duval-history';let hist=load(HKEY,[]);if(!Array.isArray(hist))hist=[];hist=hist.filter(h=>h&&typeof h.v==='string'&&h.y);
+function logHist(y,v,x){v=String(v||'').trim();if(!v)return;hist=hist.filter(h=>!(h.y===y&&h.v.toLowerCase()===v.toLowerCase()));hist.unshift({y,v:v.slice(0,200),x:x||null,at:Date.now()});hist=hist.slice(0,80);store(HKEY,hist);renderHist();}
+const HT={q:['search','Search'],case:['hash','Case number'],dl:['deadlines','Deadline']};
+function histRow(h,i){return '<li><button class="row" type="button" data-h="'+i+'">'+svg(HT[h.y][0],'i ri')+'<span class="rx"><b>'+esc(h.v)+'</b><span class="rs">'+HT[h.y][1]+'</span></span><span class="rc">'+ago(h.at)+'</span></button></li>';}
+function renderHist(){
+  const empty='<li><p class="empty">Searches, decoded case numbers and computed deadlines show up here.</p></li>';
+  $('hist').innerHTML=hist.length?hist.map(histRow).join(''):empty;
+  $('recent').innerHTML=hist.length?hist.slice(0,6).map(histRow).join(''):empty;
+  document.querySelectorAll('[data-h]').forEach(b=>b.addEventListener('click',()=>openHist(hist[+b.dataset.h])));
+  counts();
 }
-F.addEventListener('input',applyFilter);
-F.addEventListener('keydown',e=>{if(e.key==='Escape'){F.value='';applyFilter();}if(e.key==='Enter'){const first=document.querySelector('.lk:not(.hidden)');if(first&&F.value.trim()){first.focus();}}});
-document.addEventListener('keydown',e=>{if(e.key==='/'&&!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)){e.preventDefault();F.focus();}});
+function openHist(h){if(!h)return;
+  if(h.y==='q')location.hash='#/search?q='+encodeURIComponent(h.v);
+  else if(h.y==='case'){location.hash='#/cases?cn='+encodeURIComponent(h.v);}
+  else if(h.y==='dl'){pendingDl=h.x;location.hash='#/deadlines';if(curView==='deadlines'){loadDeadline(pendingDl);pendingDl=null;}}}
+let pendingDl=null;
+$('hclear').addEventListener('click',()=>{if(!hist.length)return;if(!confirm('Clear research history on this device?'))return;hist=[];store(HKEY,hist);renderHist();toast('History cleared');});
 
+/* ---------- search index ---------- */
+const SECT={};SECS.forEach(s=>SECT[s.id]=s);
+function host(u){return /^https?:/.test(u)?u.replace(/^https?:\/\/(www\.)?/,'').split('/')[0]:'in this app';}
+function linkItem(l){return {type:l.ext?'link':'doc',t:l.t,d:l.d,k:l.k,u:l.u,s:l.s,h:l.h||host(l.u),ext:l.ext};}
+const TOOLS=[
+ {type:'tool',t:'CORE case search (Clerk portal)',d:'Official Duval Clerk of Courts public access: cases, dockets and images. Sign in with your own account.',k:"core portal login account clerk records search case",u:CORE,ext:true,h:'core.duvalclerk.com'},
+ {type:'tool',t:'Florida deadline calculator',d:'Rule 2.514 computation with 4th Circuit court and Duval Clerk holidays for 2026–2027; 20 presets.',k:"deadline calculator due date compute time 2.514 days holiday weekend mail answer appeal rehearing discovery interrogatories summary judgment",u:'#/deadlines',h:'in this app'},
+ {type:'tool',t:'Case number decoder',d:'Decode county, year, court type and sequence of any Florida uniform case number.',k:"case number decoder formatter uniform case numbering court type CA CC CF DR MM CP DP CJ SC TR CT GA MH AP IN CO MO copy core search",u:'#/cases?decoder',h:'in this app'},
+ {type:'tool',t:'Saved searches & folders',d:'Names, case numbers and starred links saved on this device; export and import JSON.',k:"saved searches notes names case numbers export import json backup copy core",u:'#/saved',h:'in this app'},
+ {type:'tool',t:'Quick dial: courthouse & Clerk',d:'Duval County Courthouse, 501 W. Adams St. · Clerk main line 904-255-2000 · fee schedules.',k:"quick dial phone address courthouse clerk 501 adams contact fee schedule fees",u:'#/cases?quick',h:'in this app'},
+ {type:'tool',t:'Research history',d:'Recent searches, case numbers and deadlines on this device.',k:'history recent searches',u:'#/history',h:'in this app'}
+].concat(PRESETS.filter(p=>p.id!=='custom').map(p=>({type:'tool',t:'Deadline: '+p.l+' ('+p.d+' days)',d:p.g+' · '+(p.c?p.c+' · ':'')+'counted from '+p.t,k:'deadline due date compute '+p.g+' '+p.l+' '+p.c,u:'#/deadlines?p='+p.id,h:'deadline calculator'})));
+const LITEMS=LINKS.map(linkItem);
+function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+function allItems(){return TOOLS.concat(LITEMS,saved.map(s=>({type:'saved',t:s.t,d:(s.f?s.f+' · ':'')+(s.n||'Saved on this device'),k:'saved '+(s.f||''),u:CORE,ext:true,h:'copy & open CORE',copy:s.t})));}
+function score(it,terms){const T=norm(it.t),D=norm(it.d),K=norm(it.k)+' '+norm(it.u),S=norm(it.s?SECT[it.s].t:''),H=norm(it.h);let sc=0;
+  for(const t of terms){let w=0;if(T.includes(t))w+=(new RegExp('(^|[^a-z0-9])'+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).test(T)?7:4);if(K.includes(t))w+=2;if(D.includes(t))w+=2;if(S.includes(t)||H.includes(t))w+=1;if(!w)return 0;sc+=w;}
+  if(it.type==='tool')sc+=1.5;return sc;}
+const TYPES=[['tool','Tools'],['link','Court links'],['doc','In-app documents'],['saved','Saved items']];
+const st={q:'',types:new Set(),secs:new Set(),sort:'rel'};
+function hl(text,terms){const s=esc(text);if(!terms.length)return s;const re=new RegExp('('+terms.map(t=>esc(t).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).sort((a,b)=>b.length-a.length).join('|')+')','gi');
+  return s.split(/(&[a-z#0-9]+;)/i).map(seg=>/^&[a-z#0-9]+;$/i.test(seg)?seg:seg.replace(re,'<mark>$1</mark>')).join('');}
+function resRow(it,n,terms){
+  const li=document.createElement('li');li.className='res';
+  const badge=it.type==='tool'?'<span class="badge tool">Tool</span>':it.type==='doc'?'<span class="badge doc">Document</span>':it.type==='saved'?'<span class="badge">Saved</span>':'<span class="badge">'+esc(SECT[it.s]?SECT[it.s].t:'Link')+'</span>';
+  li.innerHTML=(n!=null?'<span class="rn">'+n+'.</span>':'<span class="rn"></span>')+'<div class="rb"><a class="rt" href="'+esc(it.u)+'"'+(it.ext?' target="_blank" rel="noopener"':'')+'>'+hl(it.t,terms)+(it.ext?'<span class="ext" aria-label="opens in new tab">↗</span>':'')+'</a>'+
+    '<div class="rm">'+badge+(it.h?'<span>'+esc(it.h)+'</span>':'')+'</div>'+(it.d?'<p class="rd">'+hl(it.d,terms)+'</p>':'')+'</div>'+
+    '<div class="ra">'+((it.type==='link'||it.type==='doc')?'<button class="star" type="button" data-u="'+esc(it.u)+'" aria-pressed="'+isStar(it.u)+'" aria-label="Star '+esc(it.t)+'">'+svg('star','')+'</button>':'')+'</div>';
+  if(n==null)li.style.gridTemplateColumns='minmax(0,1fr) auto',li.querySelector('.rn').remove();
+  const a=li.querySelector('.rt');
+  if(it.copy)a.addEventListener('click',()=>copy(it.copy,'Copied. Opening CORE'));
+  if(st.q&&it.type!=='saved')a.addEventListener('click',()=>logHist('q',st.q));
+  const b=li.querySelector('.star');if(b)b.addEventListener('click',()=>toggleStar(it.u));
+  return li;
+}
+function doSearch(){
+  const q=st.q.trim(),terms=norm(q).split(/\s+/).filter(Boolean);
+  $('crumb-q').textContent='“'+q+'”';$('h-results').textContent='Results for “'+q+'”';
+  let m=allItems().map(it=>({it,sc:score(it,terms)})).filter(x=>x.sc>0);
+  // facet counts
+  const tc={},sc={};m.forEach(({it})=>{tc[it.type]=(tc[it.type]||0)+1;if(it.s&&(!st.types.size||st.types.has(it.type)))sc[it.s]=(sc[it.s]||0)+1;});
+  $('f-type').innerHTML=TYPES.map(([v,l])=>'<label class="chk"><input type="checkbox" data-ft="'+v+'"'+(st.types.has(v)?' checked':'')+(tc[v]?'':' disabled')+'><span>'+l+'</span><span class="c">'+(tc[v]||0)+'</span></label>').join('');
+  $('f-sec').innerHTML=SECS.filter(s=>sc[s.id]||st.secs.has(s.id)).map(s=>'<label class="chk"><input type="checkbox" data-fs="'+s.id+'"'+(st.secs.has(s.id)?' checked':'')+(sc[s.id]?'':' disabled')+'><span>'+esc(s.t)+'</span><span class="c">'+(sc[s.id]||0)+'</span></label>').join('');
+  document.querySelectorAll('[data-ft]').forEach(c=>c.addEventListener('change',()=>{c.checked?st.types.add(c.dataset.ft):st.types.delete(c.dataset.ft);doSearch();}));
+  document.querySelectorAll('[data-fs]').forEach(c=>c.addEventListener('change',()=>{c.checked?st.secs.add(c.dataset.fs):st.secs.delete(c.dataset.fs);doSearch();}));
+  const total=m.length;
+  if(st.types.size)m=m.filter(x=>st.types.has(x.it.type));
+  if(st.secs.size)m=m.filter(x=>st.secs.has(x.it.s));
+  m.sort(st.sort==='az'?(a,b)=>a.it.t.localeCompare(b.it.t):(a,b)=>b.sc-a.sc||a.it.t.localeCompare(b.it.t));
+  const nf=st.types.size+st.secs.size;
+  $('fopen').innerHTML=svg('filter')+'Filters'+(nf?' ('+nf+')':'');
+  $('chips').innerHTML=[...st.types].map(v=>'<button class="chip" type="button" data-ct="'+v+'">'+TYPES.find(t=>t[0]===v)[1]+'<span aria-hidden="true">✕</span><span class="sr">remove filter</span></button>').join('')+[...st.secs].map(v=>'<button class="chip" type="button" data-cs="'+v+'">'+esc(SECT[v].t)+'<span aria-hidden="true">✕</span><span class="sr">remove filter</span></button>').join('');
+  document.querySelectorAll('[data-ct]').forEach(b=>b.addEventListener('click',()=>{st.types.delete(b.dataset.ct);doSearch();}));
+  document.querySelectorAll('[data-cs]').forEach(b=>b.addEventListener('click',()=>{st.secs.delete(b.dataset.cs);doSearch();}));
+  // case number recognized
+  const d=decode(q),D=$('detect');
+  if(d&&!d.err&&CT[d.ty]&&/\d/.test(q)){
+    D.innerHTML='<section class="panel detect" style="margin-bottom:.8rem" aria-label="Case number recognized"><div class="pb"><p class="eyebrow" style="margin-bottom:.5rem">Case number recognized</p>'+caseHTML(d)+
+      '<div class="acts" style="margin-top:.8rem"><button class="btn sm pri" type="button" id="dcopy">Copy for CORE search</button><button class="btn sm" type="button" id="dsave">Save</button><a class="btn sm" href="'+CORE+'" target="_blank" rel="noopener">Open CORE ↗</a></div></div></section>';
+    $('dcopy').addEventListener('click',()=>{copy(d.full,'Copied '+d.full+'. Paste it in CORE');logHist('case',d.full,{ty:d.ty});});
+    $('dsave').addEventListener('click',()=>addSaved(d.full,(CT[d.ty]||[''])[0]));
+  }else D.innerHTML='';
+  $('rcount').innerHTML=m.length?'<b>'+m.length+'</b> result'+(m.length===1?'':'s')+(m.length<total?' of '+total:'')+' for “'+esc(q)+'”':(D.innerHTML?'':'No results for “'+esc(q)+'”');
+  const R=$('rlist');R.innerHTML='';
+  if(!m.length&&!D.innerHTML){R.innerHTML='<li><p class="empty"><b>No matches.</b> Try a shorter word, a court type like “CF”, '+(nf?'clear the filters, ':'')+'or browse <a href="#/links">court links</a>.</p></li>';}
+  else if(!m.length)R.style.display='none';
+  if(m.length)R.style.display='';
+  m.slice(0,150).forEach((x,i)=>R.appendChild(resRow(x.it,i+1,terms)));
+}
+$('sort').addEventListener('change',()=>{st.sort=$('sort').value;doSearch();});
+$('fclear').addEventListener('click',()=>{st.types.clear();st.secs.clear();doSearch();});
+
+/* ---------- court links view ---------- */
+let lsec='';
+function linkGroups(target,secIds,terms,numbered){
+  const T=$(target);T.innerHTML='';let shown=0;
+  secIds.forEach(id=>{const s=SECT[id];const items=LITEMS.filter(l=>l.s===id&&(!terms.length||terms.every(t=>norm(l.t+' '+l.d+' '+l.k+' '+l.u+' '+s.t).includes(t))));
+    if(!items.length)return;shown+=items.length;
+    const g=document.createElement('section');g.className='rgroup';g.id='g-'+id;g.setAttribute('aria-labelledby','gh-'+id);
+    g.innerHTML='<h2 id="gh-'+id+'"><span aria-hidden="true" style="color:var(--accent)">'+esc(s.ic)+'</span>'+esc(s.t)+'<span class="c">'+items.length+'</span></h2>';
+    const ol=document.createElement('ol');ol.className='results grouped';items.forEach((it,i)=>ol.appendChild(resRow(it,numbered?i+1:null,terms)));g.appendChild(ol);T.appendChild(g);});
+  return shown;
+}
+function renderLinks(){
+  const terms=norm($('lfilter').value.trim()).split(/\s+/).filter(Boolean);
+  const cnt=id=>LITEMS.filter(l=>(!id||l.s===id)&&(!terms.length||terms.every(t=>norm(l.t+' '+l.d+' '+l.k+' '+l.u+' '+SECT[l.s].t).includes(t)))).length;
+  $('lsecs').innerHTML='<li><a href="#/links" aria-current="'+(!lsec)+'">'+svg('links')+'<span>All categories</span><span class="c">'+cnt('')+'</span></a></li>'+SECS.map(s=>'<li><a href="#/links/'+s.id+'" aria-current="'+(lsec===s.id)+'"><span aria-hidden="true" style="width:20px;text-align:center;color:var(--accent)">'+esc(s.ic)+'</span><span>'+esc(s.t)+'</span><span class="c">'+cnt(s.id)+'</span></a></li>').join('');
+  $('lsecs').querySelectorAll('a').forEach(a=>a.addEventListener('click',closeSheets));
+  $('crumb-sec').textContent=lsec?SECT[lsec].t:'All categories';
+  $('h-links').textContent=lsec?SECT[lsec].t:'Verified directory';
+  $('lfopen').innerHTML=svg('filter')+(lsec?esc(SECT[lsec].t):'Categories');
+  const n=linkGroups('lgroups',lsec?[lsec]:SECS.map(s=>s.id),terms,false);
+  $('lcount').textContent=n+' link'+(n===1?'':'s')+(terms.length?' matching “'+$('lfilter').value.trim()+'”':'')+(lsec?' in '+SECT[lsec].t:'');
+  if(!n)$('lgroups').innerHTML='<p class="empty panel">No links match. <button class="btn sm link" type="button" id="lreset">Clear filter</button></p>',$('lreset').addEventListener('click',()=>{$('lfilter').value='';renderLinks();});
+}
+$('lfilter').addEventListener('input',renderLinks);
+function renderDocs(){linkGroups('docgroups',['research','selfhelp','filing'],[],false);}
+function renderBrowse(){$('browse').innerHTML=SECS.map(s=>'<li><a class="row" href="#/links/'+s.id+'"><span class="ri" aria-hidden="true" style="width:20px;text-align:center;color:var(--accent)">'+esc(s.ic)+'</span><span class="rx"><b>'+esc(s.t)+'</b></span><span class="rc">'+LITEMS.filter(l=>l.s===s.id).length+'</span></a></li>').join('');}
+function counts(){const set=(id,v)=>{const e=$(id);if(e)e.textContent=v;};set('n-links',LINKS.length);set('n-saved',saved.length+starred.length||'');set('n-history',hist.length||'');
+  set('tile-saved',saved.length||starred.length?saved.length+' saved · '+starred.length+' starred':'Names, cases & links');}
+
+/* ---------- sheets (mobile menu & filters) ---------- */
+const scrim=$('scrim');
+function openSheet(id){closeSheets();$(id).classList.add('open');scrim.hidden=false;if(id==='rail')$('morebtn').setAttribute('aria-expanded','true');const f=$(id).querySelector('button,a');if(f)f.focus();}
+function closeSheets(){document.querySelectorAll('.open').forEach(e=>e.classList.remove('open'));scrim.hidden=true;$('morebtn').setAttribute('aria-expanded','false');}
+$('morebtn').addEventListener('click',()=>$('rail').classList.contains('open')?closeSheets():openSheet('rail'));
+$('railclose').addEventListener('click',closeSheets);
+scrim.addEventListener('click',closeSheets);
+$('fopen').addEventListener('click',()=>openSheet('facets'));
+$('lfopen').addEventListener('click',()=>openSheet('lfacets'));
+$('sfopen').addEventListener('click',()=>openSheet('sfacets'));
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeSheets));
+$('rail').querySelectorAll('a').forEach(a=>a.addEventListener('click',closeSheets));
+
+/* ---------- router ---------- */
+const TITLES={search:'Search',cases:'Cases',deadlines:'Deadlines',documents:'Documents',links:'Court links',saved:'Saved & folders',history:'History'};
+const LEGACY={portal:['cases','portal'],casenum:['cases','casenum'],quick:['cases','quick'],deadline:['deadlines',''],searches:['saved','']};
+let curView='';
+function parse(){
+  let h=location.hash||'#/';
+  if(h==='#main'||h==='#top')return null;
+  if(!h.startsWith('#/')){const id=h.slice(1);if(LEGACY[id])return {view:LEGACY[id][0],arg:'',anchor:LEGACY[id][1],params:new URLSearchParams()};if(SECT[id])return {view:'links',arg:id,params:new URLSearchParams()};return {view:'search',arg:'',params:new URLSearchParams()};}
+  const [p,qs]=h.slice(2).split('?');const segs=p.split('/');let view=segs[0]||'search';if(!TITLES[view])view='search';
+  return {view,arg:decodeURIComponent(segs[1]||''),params:new URLSearchParams(qs||''),anchor:''};
+}
+function route(){
+  const r=parse();if(!r)return;
+  const changed=r.view!==curView;curView=r.view;
+  document.querySelectorAll('.view').forEach(v=>v.hidden=v.dataset.view!==r.view);
+  document.querySelectorAll('[data-nav]').forEach(a=>{if(a.dataset.nav===r.view)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+  closeSheets();
+  let title=TITLES[r.view];
+  if(r.view==='search'){
+    const q=r.params.get('q')||'';
+    if(document.activeElement!==$('gq')||$('gq').value.trim()!==q.trim())$('gq').value=q;
+    syncG();
+    $('home').hidden=!!q.trim();$('results').hidden=!q.trim();
+    if(q.trim()){if(q!==st.q){st.types.clear();st.secs.clear();}st.q=q;doSearch();title='“'+q+'”';}else{st.q='';renderHist();}
+  }else if(r.view==='cases'){
+    if(r.params.has('cn')){$('cn').value=r.params.get('cn');showCase();}
+    const anc=r.anchor||(r.params.has('quick')?'quick':r.params.has('decoder')||r.params.has('cn')?'casenum':'');
+    if(anc){requestAnimationFrame(()=>{$(anc).scrollIntoView({block:'start'});if(anc==='casenum'&&!matchMedia('(pointer:coarse)').matches)$('cn').focus({preventScroll:true});});return finish(title,false);}
+  }else if(r.view==='deadlines'){
+    const pid=r.params.get('p');if(pid&&PRESETS.some(p=>p.id===pid)){$('preset').value=pid;dlTouched=true;onPreset();}
+    if(pendingDl){loadDeadline(pendingDl);pendingDl=null;}
+  }else if(r.view==='links'){lsec=SECT[r.arg]?r.arg:'';renderLinks();if(lsec)title=SECT[lsec].t;}
+  else if(r.view==='saved'){render();renderStarred();}
+  else if(r.view==='history'){renderHist();}
+  finish(title,changed);
+}
+function finish(title,changed){document.title=title+' · Duval Court Records';if(changed)window.scrollTo(0,0);}
+window.addEventListener('hashchange',route);
+
+/* ---------- universal search bar ---------- */
+const G=$('gq');let gT=null,gLogT=null;
+function syncG(){$('gsearch').classList.toggle('has-q',!!G.value);}
+function goSearch(push){const q=G.value;const target=q.trim()?'#/search?q='+encodeURIComponent(q):'#/';
+  if(location.hash===target)return;
+  if(push||curView!=='search'||$('results').hidden)location.hash=target;else history.replaceState(null,'',target),route();}
+G.addEventListener('input',()=>{syncG();clearTimeout(gT);gT=setTimeout(()=>goSearch(false),140);clearTimeout(gLogT);if(G.value.trim().length>=3)gLogT=setTimeout(()=>logHist('q',G.value.trim()),3000);});
+$('gsearch').addEventListener('submit',e=>{e.preventDefault();clearTimeout(gT);const q=G.value.trim();if(!q){G.focus();return;}goSearch(false);clearTimeout(gLogT);logHist('q',q);if(matchMedia('(pointer:coarse)').matches)G.blur();});
+G.addEventListener('keydown',e=>{if(e.key==='Escape'){G.value='';syncG();goSearch(false);}});
+$('gclear').addEventListener('click',()=>{G.value='';syncG();goSearch(false);G.focus();});
+document.querySelectorAll('#sugg [data-q]').forEach(b=>b.addEventListener('click',()=>{G.value=b.dataset.q;syncG();goSearch(true);logHist('q',b.dataset.q);}));
+document.addEventListener('keydown',e=>{if(e.key==='/'&&!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)){e.preventDefault();G.focus();}if(e.key==='Escape')closeSheets();});
+
+/* top bar height for sticky offsets */
+const topEl=$('top');function setTop(){document.documentElement.style.setProperty('--toph',topEl.offsetHeight+'px');}
+setTop();if('ResizeObserver' in window)new ResizeObserver(setTop).observe(topEl);else window.addEventListener('resize',setTop);
+
+render();renderStarred();renderHist();renderBrowse();renderDocs();counts();route();
 /* ---------- offline ---------- */
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(function(r){
